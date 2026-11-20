@@ -3,6 +3,24 @@
   const message = panel.querySelector('[role="status"]');
   const google = panel.querySelector('[data-google]');
   let auth;
+  let supabase;
+  const supabaseConfig = window.ESHVEH_SUPABASE_CONFIG;
+  if (supabaseConfig?.url && supabaseConfig?.publishableKey && window.supabase) {
+    supabase = window.supabase.createClient(supabaseConfig.url, supabaseConfig.publishableKey, {
+      auth: {flowType:'pkce'},
+    });
+    const returning = new URLSearchParams(location.search).has('code');
+    supabase.auth.onAuthStateChange((event, session) => {
+      const data = session?.user?.user_metadata;
+      updateProfile({photoURL:data?.avatar_url || data?.picture});
+      if (session && (returning || event === 'SIGNED_IN') && document.querySelector('[data-view="welcome"].on')) go('discover');
+      if (returning && session) {
+        const url = new URL(location.href);
+        url.searchParams.delete('code');
+        history.replaceState(null,'',url);
+      }
+    });
+  }
 
   function updateProfile(user) {
     document.querySelectorAll('[data-google-avatar]').forEach(image => {
@@ -42,6 +60,19 @@
   });
 
   google.onclick = async () => {
+    if (supabase) {
+      google.disabled = true;
+      message.textContent = '';
+      try {
+        const redirectTo = new URL('.', location.href).href;
+        const {error} = await supabase.auth.signInWithOAuth({provider:'google',options:{redirectTo}});
+        if (error) throw error;
+      } catch {
+        message.textContent = 'Google sign-in could not start. Please try again.';
+        google.disabled = false;
+      }
+      return;
+    }
     if (!config?.apiKey) {
       message.textContent = 'Google sign-in isn’t set up yet. Select Explore demo to browse the sample profiles.';
       return;

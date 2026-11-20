@@ -18,9 +18,9 @@
     trousers:'Bottoms', jeans:'Bottoms', loafers:'Shoes', sneakers:'Shoes', watch:'Extras',
   };
   const defaults = {
-    decisions:{}, matches:['ava'], received:['ava','maya'], blocked:[], reports:[],
+    decisions:{}, lastDecision:null, privacy:{visibility:'Visible'}, matches:['ava'], received:['ava','maya'], blocked:[], reports:[],
     messages:{ava:[{text:'Your farmers market answer won me over.', mine:true},{text:'Want to get dinner this week?'}]},
-    filters:{min:18,max:99,distance:50},
+    filters:{min:18,max:99,distance:50,city:'Any city',goal:'Any goal'},
     profile:{name:'Sam', age:32, work:'Architect', city:'Chicago', intent:'Long-term relationship', prompt:'A coffee walk is always a yes.', photos:[]},
     wardrobe:CLOSET.map((item, index) => ({id:String(index), name:item.t, icon:item.i, category:categoryByIcon[item.i]})),
     savedPlaces:[], plans:{},
@@ -79,14 +79,19 @@
   };
 
   const status = el('discover-status');
-  function showDiscover(preferred, message = '') {
-    const {min,max,distance} = state.filters;
-    const candidate = preferred || PEOPLE.find(p =>
+  function eligibleProfiles() {
+    const {min,max,distance,city,goal} = {...defaults.filters,...state.filters};
+    return PEOPLE.filter(p =>
       !state.decisions[p.k] && !state.blocked.includes(p.k) && p.age >= min && p.age <= max && p.mi <= distance
+      && (city === 'Any city' || city === p.city) && (goal === 'Any goal' || goal === p.intent)
     );
+  }
+  function showDiscover(preferred, message = '') {
+    const candidate = preferred || eligibleProfiles()[0];
     status.hidden = Boolean(candidate) && !message;
     status.textContent = message || (candidate ? '' : 'You’re caught up. Change your filters or reset the demo deck to see more profiles.');
     for (const id of ['like','pass','comment-like']) el(id).disabled = !candidate;
+    el('undo-decision').disabled = !state.lastDecision;
     if (!candidate) { cardWrap.replaceChildren(); return; }
     idx = PEOPLE.indexOf(candidate);
     photo = 0;
@@ -94,27 +99,31 @@
   }
   el('discover-filters').onclick = () => {
     if (document.querySelector('.swipe-out')) return;
-    const {min,max,distance} = state.filters;
+    const {min,max,distance,city,goal} = {...defaults.filters,...state.filters};
     openEditor('Discover filters', [
       field('min','Minimum age',min,{type:'number',min:18,max:99}),
       field('max','Maximum age',max,{type:'number',min:18,max:99}),
       field('distance','Maximum distance (miles)',distance,{type:'number',min:1,max:250}),
+      field('city','Browse city',city,{choices:['Any city',...new Set(PEOPLE.map(p => p.city))]}),
+      field('goal','Relationship goal',goal,{choices:['Any goal',...new Set(PEOPLE.map(p => p.intent))]}),
       button('Reset demo deck', () => {
         state.decisions = {};
+        state.lastDecision = null;
         state.filters = structuredClone(defaults.filters);
         save(); showDiscover(); renderProfile(); dialog.close();
       }),
     ], data => {
       const filters = Object.fromEntries(['min','max','distance'].map(key => [key, Number(data.get(key))]));
       if (filters.min > filters.max) throw Error('Minimum age must be at most the maximum age.');
-      state.filters = filters;
+      state.filters = {...filters,city:data.get('city'),goal:data.get('goal')};
       save(); showDiscover(); renderProfile();
     }, 'Apply filters');
   };
   let activeMatch = 'ava';
-  function decide(p, liked, note = '', target = '') {
-    state.decisions[p.k] = {liked,note,target};
+  function decide(p, liked, note = '', target = '', priority = false) {
     const incoming = state.received.includes(p.k);
+    state.lastDecision = incoming && liked ? null : {key:p.k, incoming};
+    state.decisions[p.k] = {liked,note,target,priority};
     state.received = state.received.filter(key => key !== p.k);
     if (liked && incoming && !state.matches.includes(p.k)) state.matches.push(p.k);
     if (liked && incoming && note) messages(p.k).push({text:note,mine:true});
@@ -129,13 +138,45 @@
     }
   }
   window.eshvehDecide = decide;
+  el('undo-decision').onclick = () => {
+    const previous = state.lastDecision;
+    if (!previous || document.querySelector('.swipe-out')) return;
+    delete state.decisions[previous.key];
+    if (previous.incoming && !state.received.includes(previous.key)) state.received.push(previous.key);
+    state.lastDecision = null;
+    save(); showDiscover(person(previous.key),'Last decision undone.'); renderLikes();
+  };
+  function renderGrid(daily) {
+    if (document.querySelector('.swipe-out')) return;
+    let people = eligibleProfiles();
+    if (daily) {
+      const seed = Math.floor(Date.now() / 86400000) % PEOPLE.length;
+      people = [...people].sort((a,b) => {
+        const score = p => Number(p.intent === state.profile.intent) * 20 - p.mi + ((PEOPLE.indexOf(p) + seed) % PEOPLE.length);
+        return score(b) - score(a);
+      }).slice(0,3);
+    }
+    for (const id of ['like','pass','comment-like']) el(id).disabled = true;
+    status.hidden = false;
+    status.textContent = people.length ? (daily ? 'Daily picks · ranked by goal and distance' : 'Choose a nearby profile') : 'No profiles match your filters.';
+    const panel = make('div','','profile-grid');
+    for (const p of people) {
+      const tile = button('',() => showDiscover(p));
+      tile.append(profileImage(p),make('span',`${p.name}, ${p.age} · ${p.mi} mi`));
+      panel.append(tile);
+    }
+    cardWrap.replaceChildren(panel);
+  }
+  el('browse-grid').onclick = () => renderGrid(false);
+  el('daily-picks').onclick = () => renderGrid(true);
   el('comment-like').onclick = () => {
     const p = PEOPLE[idx % PEOPLE.length];
     const targets = [`Photo ${photo + 1}`, ...p.prompts.map(([prompt]) => prompt)];
     openEditor(`Like ${p.name}'s profile`, [
       field('target','Photo or prompt',targets[0],{choices:targets}),
       field('note','Your comment','',{multiline:true,required:false}),
-    ], data => decide(p,true,String(data.get('note')).trim(),String(data.get('target'))), 'Send like');
+      field('priority','Like type','Standard',{choices:['Standard','Priority']}),
+    ], data => decide(p,true,String(data.get('note')).trim(),String(data.get('target')),data.get('priority') === 'Priority'), 'Send like');
   };
   function profileImage(p) {
     const img = make('img');
@@ -373,6 +414,10 @@
       const photo = make('img');
       photo.src = src;
       photo.alt = `Profile photo ${index + 1}`;
+      if (index > 0) tile.append(button('Set as cover',() => {
+        state.profile.photos.unshift(state.profile.photos.splice(index,1)[0]);
+        save(); renderProfile();
+      }));
       tile.append(photo,button('Remove',() => {
         state.profile.photos.splice(index,1);
         save(); renderProfile();
@@ -380,6 +425,32 @@
       gallery.append(tile);
     });
   }
+  el('preview-profile').onclick = () => {
+    const user = state.profile;
+    const elements = [make('p',`${user.name}, ${user.age}`),make('p',[user.work,user.city].filter(Boolean).join(' · ')),make('p',user.prompt)];
+    if (user.photos[0]) {
+      const cover = make('img');
+      cover.src = user.photos[0];
+      cover.alt = 'Your cover photo';
+      cover.style.maxWidth = '100%';
+      elements.unshift(cover);
+    }
+    openEditor('Profile preview',elements,() => {},'Done');
+  };
+  el('privacy-settings').onclick = () => {
+    openEditor('Profile privacy',[
+      field('visibility','Visibility preference',state.privacy.visibility,{choices:['Visible','Paused','Incognito']}),
+      make('p','Saved on this browser. Live discovery visibility requires a connected backend.'),
+      button('Export demo data',() => {
+        const url = URL.createObjectURL(new Blob([JSON.stringify(state,null,2)],{type:'application/json'}));
+        const link = make('a');
+        link.href = url;
+        link.download = 'eshveh-demo-data.json';
+        link.click();
+        setTimeout(() => URL.revokeObjectURL(url),1000);
+      }),
+    ],data => { state.privacy.visibility = data.get('visibility'); save(); });
+  };
   el('edit-profile').onclick = () => {
     const user = state.profile;
     openEditor('Edit profile',[
