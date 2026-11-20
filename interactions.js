@@ -17,13 +17,28 @@
     coat:'Outerwear', blazer:'Outerwear', shirt:'Tops', sweater:'Tops', tee:'Tops',
     trousers:'Bottoms', jeans:'Bottoms', loafers:'Shoes', sneakers:'Shoes', watch:'Extras',
   };
+  const questions = [
+    {key:'weekend', label:'Best way to spend a weekend?', options:['Out exploring','At home','With friends']},
+    {key:'plans', label:'How do you like to make plans?', options:['Plan ahead','Keep it spontaneous']},
+    {key:'pace', label:'How often do you like to go out?', options:['Most weeks','Occasionally','Rarely']},
+  ];
+  const sampleAnswers = {
+    june:['Out exploring','Plan ahead','Most weeks'],
+    ivy:['With friends','Keep it spontaneous','Most weeks'],
+    ava:['Out exploring','Plan ahead','Occasionally'],
+    maya:['Out exploring','Keep it spontaneous','Most weeks'],
+    claire:['At home','Plan ahead','Occasionally'],
+  };
+  const profileFields = [
+    ['bio','Bio'], ['pronouns','Pronouns'], ['interests','Interests'], ['languages','Languages'],
+  ];
   const defaults = {
     decisions:{}, matches:['ava'], received:['ava','maya'], blocked:[], reports:[],
     messages:{ava:[{text:'Your farmers market answer won me over.', mine:true},{text:'Want to get dinner this week?'}]},
     filters:{min:18,max:99,distance:50},
     profile:{name:'Sam', age:32, work:'Architect', city:'Chicago', intent:'Long-term relationship', prompt:'A coffee walk is always a yes.', photos:[]},
     wardrobe:CLOSET.map((item, index) => ({id:String(index), name:item.t, icon:item.i, category:categoryByIcon[item.i]})),
-    savedPlaces:[], plans:{}, rewind:null,
+    savedPlaces:[], plans:{}, rewind:null, answers:{}, chatPreferences:{}, paused:false,
   };
   const storageKey = 'eshveh.preview.v1';
   let userId;
@@ -90,11 +105,23 @@
   };
 
   const status = el('discover-status');
+  function eligible(p) {
+    const {min,max,distance,goal,city} = state.filters;
+    return !state.blocked.includes(p.k) && p.age >= min && p.age <= max && p.mi <= distance &&
+      (!goal || goal === 'Any' || p.intent === goal) && (!city || city === 'Any' || p.city === city);
+  }
+  function compatibility(p) {
+    const answers = sampleAnswers[p.k];
+    const answered = questions.flatMap(({key},i) => state.answers[key] ? [state.answers[key] === answers[i]] : []);
+    return answered.length ? {same:answered.filter(Boolean).length,total:answered.length} : null;
+  }
   function showDiscover(preferred, message = '') {
-    const {min,max,distance} = state.filters;
-    const candidate = preferred || PEOPLE.find(p =>
-      !state.decisions[p.k] && !state.blocked.includes(p.k) && p.age >= min && p.age <= max && p.mi <= distance
-    );
+    const candidate = state.paused ? null : preferred || PEOPLE.find(p => !state.decisions[p.k] && eligible(p));
+    el('nearby-grid').disabled = el('daily-picks').disabled = el('discover-filters').disabled = state.paused;
+    el('rewind').disabled = state.paused || !state.rewind;
+    if (state.paused) message = 'Discovery is paused. Resume from Profile.';
+    const score = candidate && compatibility(candidate);
+    if (score) message = [message, 'Shared answers: ' + score.same + ' of ' + score.total].filter(Boolean).join(' · ');
     status.hidden = Boolean(candidate) && !message;
     status.textContent = message || (candidate ? '' : 'You’re caught up. Change your filters or reset the demo deck to see more profiles.');
     for (const id of ['like','pass','comment-like','priority-like']) el(id).disabled = !candidate;
@@ -110,6 +137,8 @@
       field('min','Minimum age',min,{type:'number',min:18,max:99}),
       field('max','Maximum age',max,{type:'number',min:18,max:99}),
       field('distance','Maximum distance (miles)',distance,{type:'number',min:1,max:250}),
+      field('goal','Relationship goal',state.filters.goal || 'Any',{choices:['Any',...new Set(PEOPLE.map(p => p.intent))]}),
+      field('city','Demo city',state.filters.city || 'Any',{choices:['Any',...new Set(PEOPLE.map(p => p.city))]}),
       button('Reset demo deck', () => {
         state.decisions = {};
         state.rewind = null;
@@ -120,12 +149,13 @@
     ], data => {
       const filters = Object.fromEntries(['min','max','distance'].map(key => [key, Number(data.get(key))]));
       if (filters.min > filters.max) throw Error('Minimum age must be at most the maximum age.');
-      state.filters = filters;
+      state.filters = {...filters,goal:data.get('goal'),city:data.get('city')};
       save(); showDiscover(); renderProfile();
     }, 'Apply filters');
   };
   let activeMatch = 'ava';
   function decide(p, liked, note = '', target = '', priority = false) {
+    if (state.paused || state.blocked.includes(p.k)) return;
     state.rewind = {key:p.k, previous:state.decisions[p.k], received:[...state.received],
       matches:[...state.matches], messageCount:messages(p.k).length};
     el('rewind').disabled = false;
@@ -162,18 +192,26 @@
     refreshAll();
     showDiscover(person(last.key),'Last swipe undone.');
   };
-  el('nearby-grid').onclick = () => {
-    const {min,max,distance} = state.filters;
-    const cards = PEOPLE.filter(p => !state.blocked.includes(p.k) && p.age >= min &&
-      p.age <= max && p.mi <= distance).sort((a,b) => a.mi - b.mi).map(p => {
+  function showProfileGrid(title, profiles) {
+    const cards = profiles.map(p => {
       const card = button('',() => { dialog.close(); showDiscover(p); },'nearby-card');
-      card.append(profileImage(p),make('span',p.name + ', ' + p.age + ' · ' + p.mi + ' mi'));
+      const score = compatibility(p);
+      const detail = score ? score.same + ' of ' + score.total + ' answers in common' : p.mi + ' mi';
+      card.append(profileImage(p),make('span',p.name + ', ' + p.age + ' · ' + detail));
       return card;
     });
     const list = make('div','','nearby-grid');
     list.append(...cards);
     if (!cards.length) list.append(make('p','No profiles match these filters.'));
-    openEditor('Nearby profiles',[list],() => {},'Done');
+    openEditor(title,[list],() => {},'Done');
+  }
+  el('nearby-grid').onclick = () => showProfileGrid('Nearby profiles',PEOPLE.filter(eligible).sort((a,b) => a.mi-b.mi));
+  el('daily-picks').onclick = () => {
+    const day = Math.floor(Date.now()/86400000);
+    const rotated = PEOPLE.map((_,index) => PEOPLE[(index+day)%PEOPLE.length]);
+    const score = p => compatibility(p)?.same ?? 0;
+    const picks = rotated.filter(p => eligible(p) && !state.decisions[p.k]).sort((a,b) => score(b)-score(a));
+    showProfileGrid('Daily picks', picks.slice(0,3));
   };
   el('comment-like').onclick = () => {
     const p = PEOPLE[idx % PEOPLE.length];
@@ -192,31 +230,40 @@
   function renderLikes() {
     const list = el('received-likes');
     list.replaceChildren();
-    for (const key of state.received) {
+    for (const key of state.paused ? [] : state.received) {
       const p = person(key);
       const item = make('div', '', 'liked-profile');
       const view = button(`${p.name}, ${p.age} · ${p.city}`, () => { showDiscover(p); go('discover'); });
       item.append(profileImage(p),view,button('Like back',() => decide(p,true),'chip solid'),button('Pass',() => decide(p,false)));
       list.append(item);
     }
-    if (!list.children.length) list.append(make('p','You’re caught up on sample likes.','muted'));
+    if (!list.children.length) list.append(make('p',state.paused ? 'Resume discovery to view incoming likes.' : 'You’re caught up on sample likes.','muted'));
   }
   function messages(key = activeMatch) { return state.messages[key] ??= []; }
+  let showArchived = false;
+  const chatPrefs = key => state.chatPreferences[key] || {};
+  for (const [id,archived] of [['inbox-active',false],['inbox-archived',true]]) {
+    el(id).onclick = () => { showArchived = archived; renderMatches(); };
+  }
   function renderMatches() {
+    for (const [id,active] of [['inbox-active',!showArchived],['inbox-archived',showArchived]]) {
+      el(id).classList.toggle('solid',active);
+      el(id).setAttribute('aria-pressed',String(active));
+    }
     const list = el('match-list');
     list.replaceChildren();
-    for (const key of state.matches) {
+    for (const key of state.matches.filter(key => Boolean(chatPrefs(key).archived) === showArchived)) {
       const p = person(key);
       const row = button('', () => { selectMatch(key); go('chat'); }, 'row');
       const avatar = make('span','','av-s');
       avatar.append(profileImage(p));
       const details = make('span');
       const last = messages(key).at(-1);
-      details.append(make('b',p.name),make('p',last ? (last.mine ? 'You: ' : '') + last.text : 'Start the conversation'));
+      details.append(make('b',p.name + (chatPrefs(key).muted ? ' · Muted' : '')),make('p',last ? (last.mine ? 'You: ' : '') + last.text : 'Start the conversation'));
       row.append(avatar,details);
       list.append(row);
     }
-    if (!list.children.length) list.append(make('p','New matches will appear here.','pad'));
+    if (!list.children.length) list.append(make('p',showArchived ? 'No archived conversations.' : 'New matches will appear here.','pad'));
   }
   function renderChat() {
     const p = person(activeMatch);
@@ -224,11 +271,23 @@
     el('chat-name').textContent = available ? p.name : 'Messages';
     el('chat-details').textContent = available ? `${p.age} · ${p.mi} mi away` : '';
     el('chat-avatar').replaceChildren(...(available ? [profileImage(p)] : []));
-    el('chat-form').hidden = el('match-options').hidden = !available;
+    el('chat-form').hidden = el('match-options').hidden = el('chat-icebreaker').hidden = !available;
     const bubbles = el('bubbles');
     bubbles.replaceChildren();
     if (available) {
-      for (const {text,mine} of messages()) bubbles.append(make('div',text,`b ${mine ? 'me' : 'them'}`));
+      for (const message of messages()) {
+        const bubble = make('div',message.text,`b ${message.mine ? 'me' : 'them'}`);
+        if (!message.mine) {
+          const reaction = button(message.reaction ? '♥' : '♡',() => {
+            message.reaction = !message.reaction;
+            save(); renderChat();
+          },'reaction');
+          reaction.setAttribute('aria-label','Heart reaction');
+          reaction.setAttribute('aria-pressed',String(Boolean(message.reaction)));
+          bubble.append(reaction);
+        }
+        bubbles.append(bubble);
+      }
     }
     if (!bubbles.children.length) bubbles.append(make('p',available ? 'Say hello to start the conversation.' : 'Open a match to start chatting.','stamp'));
   }
@@ -247,20 +306,36 @@
     renderChat(); renderMatches();
     el('bubbles').lastElementChild.scrollIntoView({block:'nearest'});
   };
+  el('chat-icebreaker').onclick = () => {
+    const p = person(activeMatch);
+    if (!p || !state.matches.includes(p.k)) return;
+    if (el('msg').value.trim()) { el('msg').focus(); return; }
+    el('msg').value = 'What got you into ' + p.interests.split(' · ')[0].toLowerCase() + '?';
+    el('msg').focus();
+  };
   el('match-options').onclick = () => {
     if (!state.matches.includes(activeMatch)) return;
     const p = person(activeMatch);
+    const preferences = chatPrefs(p.k);
+    const muteLabel = preferences.muted ? 'Unmute' : 'Mute';
+    const archiveLabel = preferences.archived ? 'Move to inbox' : 'Archive';
     openEditor(`Options for ${p.name}`,[
-      field('action','Action','Unmatch',{choices:['Unmatch','Block','Report']}),
+      field('action','Action',muteLabel,{choices:[muteLabel,archiveLabel,'Unmatch','Block','Report']}),
       field('reason','Details for a demo report','',{multiline:true,required:false}),
     ], data => {
       const action = data.get('action');
-      if (action === 'Report') {
+      if (action === muteLabel || action === archiveLabel) {
+        const key = action === muteLabel ? 'muted' : 'archived';
+        state.chatPreferences[p.k] = {...preferences,[key]:!preferences[key]};
+        renderMatches();
+        if (key === 'archived') go('matches');
+      } else if (action === 'Report') {
         const reason = normalize(data.get('reason'));
         if (!reason) throw Error('Add a reason for the report.');
         state.reports.push({key:p.k,reason});
         el('bubbles').append(make('p','Demo report saved on this device.','stamp'));
       } else {
+        state.rewind = null;
         state.matches = state.matches.filter(key => key !== p.k);
         if (action === 'Block') {
           state.blocked.push(p.k);
@@ -456,6 +531,7 @@
     const user = state.profile;
     el('account-name').textContent = `${user.name}, ${user.age}`;
     el('profile-details').textContent = [user.work,user.city].filter(Boolean).join(' · ');
+    el('profile-pause').textContent = state.paused ? 'Resume discovery' : 'Pause discovery';
     const info = el('profile-info');
     info.replaceChildren();
     for (const [title,value] of [['Looking for',user.intent],['My prompt',user.prompt],['Discover radius',`${state.filters.distance} mi`]]) {
@@ -480,6 +556,7 @@
   el('edit-profile').onclick = () => {
     const user = state.profile;
     openEditor('Edit profile',[
+      ...profileFields.map(([key,label]) => field(key,label,user[key],{required:false,multiline:key === 'bio'})),
       field('name','Display name',user.name),
       field('age','Age',user.age,{type:'number',min:18,max:99}),
       field('work','Work',user.work,{required:false}),
@@ -494,14 +571,51 @@
       if (!name) throw Error('Enter a display name.');
       const uploaded = await Promise.all(photos.map(photoData));
       const updated = {...user,name,age:Number(data.get('age')),photos:[...user.photos,...uploaded]};
-      for (const key of ['work','city','intent','prompt']) updated[key] = normalize(data.get(key));
+      for (const key of ['work','city','intent','prompt',...profileFields.map(([key]) => key)]) updated[key] = normalize(data.get(key));
       state.profile = updated;
       if (!save()) { state.profile = user; throw Error('Device storage is full. Remove a photo and try again.'); }
       renderProfile();
     });
   };
 
+  el('profile-preview').onclick = () => {
+    const user = state.profile;
+    const content = make('div','','profile-preview');
+    content.append(make('h3',user.name + ', ' + user.age),make('p',[user.city,user.work].filter(Boolean).join(' · ')));
+    for (const [key,label] of [...profileFields,['intent','Looking for'],['prompt','My prompt']]) {
+      if (user[key]) content.append(make('strong',label),make('p',user[key]));
+    }
+    const gallery = make('div','','nearby-grid');
+    user.photos.forEach((src,index) => {
+      const image = make('img');
+      image.src = src;
+      image.alt = 'Profile photo ' + (index + 1);
+      gallery.append(image);
+    });
+    content.append(gallery);
+    openEditor('Profile preview',[content],() => {},'Done');
+  };
+  el('compatibility').onclick = () => openEditor('Compatibility questions',
+    questions.map(({key,label,options}) => field(key,label,state.answers[key] || '',{choices:['',...options],required:false})),
+    data => {
+      state.answers = Object.fromEntries(questions.map(({key}) => [key,String(data.get(key))]));
+      save(); showDiscover();
+    }
+  );
+  el('profile-pause').onclick = () => {
+    state.paused = !state.paused;
+    save(); renderProfile(); renderLikes(); showDiscover();
+  };
+  el('export-data').onclick = () => {
+    const url = URL.createObjectURL(new Blob([JSON.stringify(state,null,2)],{type:'application/json'}));
+    const link = make('a');
+    link.href = url;
+    link.download = 'eshveh-preview-data.json';
+    link.click();
+    setTimeout(() => URL.revokeObjectURL(url),1000);
+  };
   function refreshAll() {
+    showArchived = false;
     activeMatch = state.matches[0] || '';
     el('rewind').disabled = !state.rewind;
     showDiscover(); renderLikes(); renderMatches(); renderChat(); refreshPlan(); renderCloset(); renderProfile();
