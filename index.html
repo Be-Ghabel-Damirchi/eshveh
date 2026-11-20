@@ -216,7 +216,7 @@ button:focus-visible,label:focus-within,a:focus-visible{outline:1.5px solid var(
 .profile-photos{padding:12px 22px}.profile-photos img{width:72px;height:86px;object-fit:cover;border-radius:8px}
 #discover-status[hidden],#chat-form[hidden]{display:none}.composer input{min-width:0}.liked-profile{flex-wrap:wrap}.liked-profile .chip{margin-left:0}
 </style>
-<link rel="stylesheet" href="experience.css">
+<link rel="stylesheet" href="experience.css?v=10">
 </head>
 <body>
 <main class="wall">
@@ -390,7 +390,7 @@ button:focus-visible,label:focus-within,a:focus-visible{outline:1.5px solid var(
   <div class="gallery-photos" id="gallery-photos"></div>
 </dialog>
 
-<dialog class="edit-dialog" id="editor"><form id="editor-form"><h2 id="editor-title"></h2><div class="edit-fields" id="editor-fields"></div><p id="editor-error" role="status"></p><div class="edit-actions"><button class="chip solid" type="submit" id="editor-save">Save</button><button class="chip" type="button" id="editor-cancel">Cancel</button></div></form></dialog>
+<dialog class="edit-dialog" id="editor" aria-labelledby="editor-title"><form id="editor-form"><h2 id="editor-title"></h2><div class="edit-fields" id="editor-fields"></div><p id="editor-error" role="status"></p><div class="edit-actions"><button class="chip solid" type="submit" id="editor-save">Save</button><button class="chip" type="button" id="editor-cancel">Cancel</button></div></form></dialog>
 <script>
 // ---------- portraits: abstract monochrome silhouettes (no real photos) ----------
 const TONES = {ava:["#2b2b2b","#8a8a86"],mia:["#3c3c3a","#b9b8b3"],nora:["#1c1c1c","#6f6f6c"],lena:["#4a4a47","#cfcec9"],sam:["#151515","#9d9c97"],june:["#333","#aaa9a4"],ivy:["#222","#c4c3be"]};
@@ -636,7 +636,7 @@ window.addEventListener("hashchange", () => go(location.hash.slice(1) || "welcom
 </script>
 <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.js"></script>
 <script defer src="supabase-config.js"></script>
-<script defer src="interactions.js"></script>
+<script defer src="interactions.js?v=10"></script>
 <script defer src="account.js"></script>
 </body>
 </html>
