@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Eshveh App Preview</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Eshveh</title>
 <link rel="icon" type="image/png" href="eshveh-logo.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -187,40 +187,6 @@ button:focus-visible,label:focus-within,a:focus-visible{outline:1.5px solid var(
 .list div{display:flex;justify-content:space-between;padding:15px 0;border-bottom:1px solid var(--hair);font-size:14px}
 .list div span:last-child{color:var(--graphite)}
 
-/* screen picker under phone */
-.picker{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;max-width:390px}
-.picker button{font-size:12px;padding:6px 12px;border:1px solid var(--hair);border-radius:14px;color:var(--graphite)}
-.picker button.on{border-color:var(--ink);color:var(--ink)}
-
-/* ---------- right column ---------- */
-.notes{display:grid;gap:56px;padding-top:8px}
-.notes h2{font-family:var(--display);font-weight:500;font-size:40px;line-height:1.05;text-wrap:balance}
-.notes h2 i{font-weight:400}
-.lede{font-size:16px;line-height:1.6;color:var(--graphite);max-width:62ch;margin-top:14px}
-.features{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--hair);border:1px solid var(--hair);margin-top:28px}
-@media (max-width:640px){.features{grid-template-columns:1fr}}
-.feature{background:var(--paper);padding:22px}
-.feature .k{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--graphite)}
-.feature h3{font-family:var(--display);font-weight:500;font-size:24px;margin:8px 0 8px}
-.feature ol{padding-left:18px;font-size:14px;line-height:1.6;color:var(--graphite);display:grid;gap:4px}
-.feature ol b{color:var(--ink);font-weight:500}
-
-.roadmap{margin-top:30px;border-top:1px solid var(--ink)}
-.step{display:grid;grid-template-columns:64px 1fr auto;gap:20px;padding:22px 0;border-bottom:1px solid var(--hair);align-items:start}
-@media (max-width:640px){.step{grid-template-columns:44px 1fr}.step .state{grid-column:2}}
-.step .num{font-family:var(--display);font-size:40px;line-height:.9;font-variant-numeric:tabular-nums}
-.step h3{font-size:16px;font-weight:500}
-.step p{font-size:14px;line-height:1.55;color:var(--graphite);margin-top:6px;max-width:60ch}
-.step ul{list-style:none;margin-top:10px;display:grid;gap:6px;font-size:13.5px;line-height:1.45}
-.step li{display:grid;grid-template-columns:16px 1fr;gap:8px}
-.step li::before{content:"";width:9px;height:9px;border:1px solid var(--ink);border-radius:2px;margin-top:4px}
-.step li.done::before{background:var(--ink)}
-.state{font-size:11px;letter-spacing:.1em;text-transform:uppercase;padding:5px 10px;border-radius:12px;border:1px solid var(--hair);white-space:nowrap;color:var(--graphite)}
-.state.done{background:var(--ink);color:var(--white);border-color:var(--ink)}
-.state.next{border-color:var(--ink);color:var(--ink)}
-.step.is-done .num{color:var(--graphite)}
-code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;background:var(--mist);padding:1px 6px;border-radius:5px;color:var(--ink)}
-.foot{font-size:12px;color:var(--graphite);border-top:1px solid var(--hair);padding-top:16px;line-height:1.6}
 .account-panel{display:grid;gap:14px}
 .account-panel h2{font-family:var(--display);font-size:34px}
 .account-panel p{font-size:14px}
@@ -253,18 +219,10 @@ code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;ba
 <link rel="stylesheet" href="experience.css">
 </head>
 <body>
-<div class="wall">
-  <header class="mast">
-    <h1>Eshveh <i>— app preview</i></h1>
-    <p>v0.1 · Updated Nov 20, 2026 · Sample data</p>
-  </header>
-
-  <!-- ================= PHONE ================= -->
-  <section class="stage" aria-label="Clickable app preview">
-    <div class="phone">
+<main class="wall">
+  <section class="stage" aria-label="Eshveh dating app">
+    <div class="phone" id="app-shell">
       <div class="screen">
-        <div class="status" id="statusbar"><span>7:30</span><span class="notch"></span><span>5G ▮▮▮</span></div>
-
         <!-- 1 Welcome -->
         <div class="view welcome on" data-view="welcome">
           <div class="hero">
@@ -272,16 +230,13 @@ code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;ba
             <div class="wordmark">Eshveh</div>
             <p>Fewer swipes. Better first dates.</p>
           </div>
-          <ul>
-            <li><span>i</span>Match with people who fit what you want.</li>
-            <li><span>ii</span>Get three 4★+ spots halfway between you.</li>
-            <li><span>iii</span>Get three looks from your own closet for the weather.</li>
-          </ul>
           <div class="cta">
-            <button class="btn solid" data-account="new">Sign up</button>
-            <button class="btn line" data-account="returning">Sign in</button>
-            <small>18+ only. By continuing you agree to our Terms and Privacy Policy.</small>
+            <button class="btn solid" data-go="discover">Explore demo</button>
+            <button class="btn line" data-account="new">Sign up</button>
+            <button class="welcome-signin" data-account="returning">Sign in</button>
+            <small>18+ · Sample profiles and venues</small>
           </div>
+          <div class="welcome-photo" aria-hidden="true"></div>
         </div>
 
         <div class="view" data-view="account">
@@ -302,11 +257,11 @@ code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;ba
 
         <!-- 2 Discover -->
         <div class="view" data-view="discover">
-          <div class="top"><span class="wordmark"><img class="discover-logo" src="eshveh-logo.png" alt="Eshveh"></span>
+          <div class="top"><h1 class="wordmark">Discover</h1>
             <button class="icon-btn" aria-label="Filters" id="discover-filters"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg></button>
           </div>
-          <p class="swipe-hint">Tap for the next photo. Swipe right to like or left to pass.</p>
-          <div class="discovery-tools" aria-label="Discovery tools"><button class="chip" id="nearby-grid" type="button">Nearby grid</button><button class="chip" id="daily-picks" type="button">Daily picks</button><button class="chip" id="rewind" type="button">Undo</button><button class="chip" id="priority-like" type="button">Priority like</button></div><p id="discover-status" class="swipe-hint" role="status" hidden></p><div id="cardwrap"></div>
+
+          <div class="discovery-tools" aria-label="Discovery tools"><button class="chip" id="nearby-grid" type="button">Nearby grid</button><button class="chip" id="daily-picks" type="button">Daily picks</button><button class="chip" id="second-look" type="button">Second look</button><button class="chip" id="rewind" type="button">Undo</button><button class="chip" id="priority-like" type="button">Priority like</button></div><p id="discover-status" class="swipe-hint" role="status" hidden></p><div id="cardwrap"></div>
           <div class="actions">
             <button class="round" id="pass" aria-label="Pass"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
             <button class="chip" id="comment-like" type="button">Like with a note</button><button class="round solid" id="like" aria-label="Like"><svg viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg></button>
@@ -336,7 +291,7 @@ code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;ba
             <span class="av-s" style="width:38px;height:38px" id="chat-avatar" data-portrait="ava"></span>
             <span><b id="chat-name" style="font-weight:500">Ava</b><br><span class="muted" id="chat-details" style="font-size:12px"></span></span>
           </div>
-          <div class="bubbles" id="bubbles" aria-live="polite"></div>
+          <div class="pad match-timing" id="match-timing" hidden></div><div class="bubbles" id="bubbles" aria-live="polite"></div>
           <form class="composer" id="chat-form">
             <button type="button" class="chip line" data-go="plan">Plan a date</button>
             <input id="msg" required maxlength="500" placeholder="Message" aria-label="Message">
@@ -416,8 +371,8 @@ code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;ba
           <div class="pad"><p id="sync-status" role="status"></p><button class="chip" type="button" id="sign-out" hidden>Sign out</button></div><div class="pad profile-tools"><button class="chip" id="profile-preview" type="button">Preview</button><button class="chip" id="compatibility" type="button">Compatibility questions</button><button class="chip" id="profile-pause" type="button">Pause discovery</button><button class="chip" id="export-data" type="button">Download data</button></div><div class="list" id="profile-info"></div><div class="profile-photos" id="profile-photos"></div>
         </div>
 
-        <nav class="tabs" id="tabs">
-          <button data-go="discover" data-tab="discover"><img src="eshveh-logo.png" alt="">Discover</button>
+        <nav class="tabs" id="tabs" aria-label="Main navigation"><div class="nav-brand"><img src="eshveh-logo.png" alt=""><span>Eshveh</span></div>
+          <button data-go="discover" data-tab="discover"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="m15 9-2 4-4 2 2-4z"/></svg>Discover</button>
           <button data-go="likes" data-tab="likes" aria-label="Likes You"><svg viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg>Likes You</button>
           <button data-go="matches" data-tab="matches"><svg viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"/></svg>Matches</button>
           <button data-go="closet" data-tab="closet"><svg viewBox="0 0 24 24"><path d="M12 4a2 2 0 0 0-2 2c0 1.2 2 1.8 2 3L3 15.5c-.8.6-.4 1.5.5 1.5h17c.9 0 1.3-.9.5-1.5L12 9"/></svg>Closet</button>
@@ -426,83 +381,14 @@ code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;ba
         </nav>
       </div>
     </div>
-    <div class="picker" id="picker"></div>
   </section>
+</main>
 
-  <!-- ================= NOTES ================= -->
-  <main class="notes">
-    <section>
-      <span class="eyebrow">What Eshveh does</span>
-      <h2>A dating app that plans <i>the first date</i> for you.</h2>
-      <p class="lede">Tap through the phone on the left. Everything is black and white, every screen has one clear action, and the two features that set Eshveh apart show up right after a match.</p>
-      <div class="features">
-        <div class="feature">
-          <span class="k">Feature 01</span>
-          <h3>Three spots, halfway</h3>
-          <ol>
-            <li>Finds the <b>midpoint</b> between both of you.</li>
-            <li>Searches <b>Google Places</b> for restaurants and cafés around it.</li>
-            <li>Keeps only places rated <b>4.0★ or higher</b> with 50+ reviews, open at your date time.</li>
-            <li>Asks <b>Google Routes</b> for real travel time from each of you.</li>
-            <li>Ranks by rating and fairness, then picks <b>3 different kinds</b> of places.</li>
-          </ol>
-        </div>
-        <div class="feature">
-          <span class="k">Feature 02</span>
-          <h3>Three looks, your closet</h3>
-          <ol>
-            <li>You photograph each piece once.</li>
-            <li><b>Claude</b> tags it: type, color, how dressy, how warm.</li>
-            <li>Eshveh checks the <b>forecast</b> at the restaurant for the date's hour.</li>
-            <li>Matches dressiness to the spot: café = casual, bistro = smart, fine dining = upscale.</li>
-            <li>Builds <b>3 distinct, complete outfits</b>, adding a coat when it's cold or rainy.</li>
-          </ol>
-        </div>
-      </div>
-    </section>
-
-    <section>
-      <span class="eyebrow">Your launch plan</span>
-      <h2>Eight steps from <i>here</i> to the App Store.</h2>
-      <p class="lede">The preview uses fictional people and venues. Use it to try discovery, date planning, and wardrobe features.</p>
-      <div class="roadmap">
-        <div class="step is-done"><span class="num">01</span><div><h3>Build the first version</h3>
-          <p>Backend (Python + FastAPI) and the iPhone/Android app (React Native + Expo).</p>
-          <ul><li class="done">Sign up, profiles, photos, location kept private</li><li class="done">Discover, likes, matches, chat, block & report</li><li class="done">Date spots: midpoint + Google Places + Google Routes, 4★+</li><li class="done">Closet upload + Claude tagging + 3 weather-aware looks</li><li class="done">App screens: welcome, sign up, 4-step onboarding, swipe deck, match, chat, date spots, closet, looks, profile</li><li class="done">15 backend tests passing; app type-checks and builds for iPhone</li></ul></div><span class="state done">Done</span></div>
-
-        <div class="step"><span class="num">02</span><div><h3>Create your API keys</h3>
-          <p>These let the backend talk to Google and Claude. Each takes about 10 minutes.</p>
-          <ul><li class="done">Google Cloud terms accepted and project "Noir Dating App" created</li><li><b style="font-weight:500">You:</b> click Verify Account in Google Cloud and add your phone number and card (Google requires this; free-trial credit applies)</li><li>Then Claude enables <code>Places API (New)</code> and <code>Routes API</code> and creates a key restricted to those two</li><li>Anthropic Console: create an API key for clothing tagging and styling</li><li>Paste both into the backend's <code>.env</code> file</li></ul></div><span class="state next">Needs you</span></div>
-
-        <div class="step"><span class="num">03</span><div><h3>Run it on your computer and phone</h3>
-          <p>See the real app working with real places before spending anything on hosting.</p>
-          <ul><li>Install Docker Desktop and Node.js</li><li>Backend: <code>docker compose up</code>, then open <code>localhost:8000/docs</code></li><li>App: <code>npm install</code> then <code>npx expo start</code>, scan the QR code with your phone</li></ul></div><span class="state">To do</span></div>
-
-        <div class="step"><span class="num">04</span><div><h3>Developer accounts</h3>
-          <p>Needed to put the app on phones outside your own.</p>
-          <ul><li>Apple Developer Program (yearly fee) for iPhone</li><li>Google Play Console (one-time fee) for Android</li><li>Expo account for cloud builds with EAS</li><li>Form an LLC first if you want the store listing under a company name</li></ul></div><span class="state">To do</span></div>
-
-        <div class="step"><span class="num">05</span><div><h3>Put the backend online</h3>
-          <p>One server, one database, one place for photos.</p>
-          <ul><li>Host the API on Render, Railway or Fly.io</li><li>Managed PostgreSQL from the same host</li><li>Photos in Amazon S3 or Cloudflare R2</li><li>A domain like <code>api.yourdomain.com</code> with HTTPS</li></ul></div><span class="state">To do</span></div>
-
-        <div class="step"><span class="num">06</span><div><h3>Safety, privacy and legal</h3>
-          <p>App stores reject dating apps without these, and US rules apply to location and photos.</p>
-          <ul><li>Privacy Policy and Terms of Service (have a lawyer review)</li><li>Photo moderation and selfie verification</li><li>Clear 18+ age gate (already in the backend)</li><li>Check state privacy laws such as California's CCPA and, if you add face checks, Illinois' BIPA</li></ul></div><span class="state">To do</span></div>
-
-        <div class="step"><span class="num">07</span><div><h3>Private beta in one city</h3>
-          <p>Dating apps need density. Launch where 200–500 people can join in the same few weeks.</p>
-          <ul><li>TestFlight (iPhone) and Play internal testing (Android)</li><li>Invite friends and friends of friends, balanced men and women</li><li>Watch: matches per user, plans sent, dates that happen</li></ul></div><span class="state">To do</span></div>
-
-        <div class="step"><span class="num">08</span><div><h3>Public launch</h3>
-          <p>Submit to both stores, then grow city by city.</p>
-          <ul><li>Store listing: screenshots from this preview, description, support email</li><li>Optional subscription later, such as unlimited likes or priority date spots</li><li>Add more cities when the first one has steady daily matches</li></ul></div><span class="state">To do</span></div>
-      </div>
-    </section>
-
-    <p class="foot">People, places and clothes on this page are sample data for the preview. In the real app, places come live from Google Maps and outfits come from your own uploaded photos. This page will be updated as the app changes.</p>
-  </main>
-</div>
+<dialog class="photo-gallery" id="photo-gallery" aria-labelledby="gallery-title">
+  <header><h2 id="gallery-title"></h2><form method="dialog"><button class="icon-btn" aria-label="Close photos">×</button></form></header>
+  <img id="gallery-image" alt="">
+  <div class="gallery-photos" id="gallery-photos"></div>
+</dialog>
 
 <dialog class="edit-dialog" id="editor"><form id="editor-form"><h2 id="editor-title"></h2><div class="edit-fields" id="editor-fields"></div><p id="editor-error" role="status"></p><div class="edit-actions"><button class="chip solid" type="submit" id="editor-save">Save</button><button class="chip" type="button" id="editor-cancel">Cancel</button></div></form></dialog>
 <script>
@@ -531,20 +417,25 @@ document.querySelectorAll('[data-portrait="ava"]').forEach(element => {
 });
 
 // ---------- navigation ----------
-const LABELS = {welcome:"Welcome",discover:"Discover",likes:"Likes You",match:"Match",matches:"Matches",chat:"Chat",plan:"Places",closet:"Closet",looks:"Looks",profile:"Profile"};
-const NO_TABS = ["welcome","account","match","chat","looks"];
+const NO_TABS = ["welcome","account","match"];
 const TAB_OF = {discover:"discover",matches:"matches",chat:"matches",closet:"closet",looks:"closet",profile:"profile",plan:"plan",likes:"likes"};
-const picker = document.getElementById("picker");
-Object.entries(LABELS).forEach(([k,v])=>{const b=document.createElement("button");b.textContent=v;b.dataset.go=k;picker.appendChild(b);});
-function go(name){
-  document.querySelectorAll(".view").forEach(v=>v.classList.toggle("on", v.dataset.view===name));
-  document.getElementById("tabs").classList.toggle("hidden", NO_TABS.includes(name));
-  document.querySelectorAll("#tabs button").forEach(b=>b.classList.toggle("on", b.dataset.tab===TAB_OF[name]));
-  picker.querySelectorAll("button").forEach(b=>b.classList.toggle("on", b.dataset.go===name));
-  const sb = document.getElementById("statusbar");
-  const dark = name==="welcome"||name==="match";
-  sb.style.background = dark ? "#0b0b0b" : "#fff"; sb.style.color = dark ? "#fff" : "#0b0b0b";
-  if (location.hash !== "#"+name) history.replaceState(null,"","#"+name);
+const views = [...document.querySelectorAll(".view")];
+function go(name, replace = false){
+  const destination = views.find(view => view.dataset.view === name);
+  if (!destination) return;
+  const changed = !destination.classList.contains("on");
+  views.forEach(view => view.classList.toggle("on",view === destination));
+  const withoutNav = NO_TABS.includes(name);
+  document.getElementById("app-shell").classList.toggle("without-nav",withoutNav);
+  document.getElementById("tabs").classList.toggle("hidden",withoutNav);
+  document.querySelectorAll("#tabs [data-tab]").forEach(button => {
+    const current = button.dataset.tab === TAB_OF[name];
+    button.classList.toggle("on",current);
+    if (current) button.setAttribute("aria-current","page");
+    else button.removeAttribute("aria-current");
+  });
+  if (changed) destination.scrollTop = 0;
+  if (location.hash !== "#"+name) history[replace ? "replaceState" : "pushState"](null,"","#"+name);
 }
 document.addEventListener("click", e=>{const t=e.target.closest("[data-go]"); if(t){e.preventDefault(); go(t.dataset.go);}});
 
@@ -561,13 +452,21 @@ let photo = 0;
 function renderCard(){
   const p = PEOPLE[idx % PEOPLE.length];
   document.getElementById("cardwrap").innerHTML = `<article class="card" id="card">
-    <div class="portrait">
-      <button type="button" class="photo-tap" aria-label="Next photo"><img draggable="false" src="photos/${p.k}-${photo + 1}.jpg" alt="${p.name}, photo ${photo + 1} of 6"></button>
-      <div class="meta"><h3>${p.name}, ${p.age}</h3><p>${p.job} · ${p.mi} miles away</p></div>
-      <span class="photo-count" aria-live="polite">${photo + 1} / 6</span>
+    <div class="photo-panel">
+      <div class="portrait">
+        <button type="button" class="photo-tap" aria-label="Next profile photo"><img draggable="false" src="photos/${p.k}-${photo + 1}.jpg" alt="${p.name}, photo ${photo + 1} of 6"></button>
+        <div class="meta"><h2>${p.name}, ${p.age}</h2><p>${p.job} · ${p.mi} miles away</p></div>
+        <span class="swipe-feedback" aria-hidden="true"></span>
+        <button type="button" class="photo-count" data-gallery>View photos</button>
+        <button type="button" class="photo-arrow prev" data-photo-step="-1" aria-label="Previous photo">‹</button>
+        <button type="button" class="photo-arrow next" data-photo-step="1" aria-label="Next photo">›</button>
+      </div>
+      <div class="photo-strip" aria-label="More sample photos">${Array.from({length:5},(_,i) => `<button type="button" data-photo-index="${i + 1}" aria-label="Open sample photo ${i + 1}"><img src="photos/${p.k}-${i+2}.jpg" loading="lazy" alt=""></button>`).join("")}</div>
     </div>
-    <div class="profile-facts">${[p.city,p.height,p.education,p.intent,p.interests].map(value => `<span>${value}</span>`).join("")}</div>
-    ${p.prompts.map(([q,a]) => `<div class="prompt"><div class="q">${q}</div><div class="a">${a}</div></div>`).join("")}
+    <div class="profile-content">
+      <div class="profile-facts">${[p.city,p.height,p.education,p.intent,p.interests].map(value => `<span>${value}</span>`).join("")}</div>
+      ${p.prompts.map(([q,a]) => `<div class="prompt"><div class="q">${q}</div><div class="a">${a}</div></div>`).join("")}
+    </div>
     </article>`;
 }
 const cardWrap = document.getElementById("cardwrap");
@@ -579,27 +478,82 @@ cardWrap.addEventListener("pointerdown", event => {
   pointerStart = { id:event.pointerId, x:event.clientX, y:event.clientY };
   event.target.setPointerCapture(event.pointerId);
 });
-cardWrap.addEventListener("pointercancel", () => { pointerStart = null; });
+function clearDrag(){
+  pointerStart = null;
+  const panel = cardWrap.querySelector(".portrait");
+  panel?.style.removeProperty("--drag");
+  panel?.style.removeProperty("--tilt");
+  const feedback = panel?.querySelector(".swipe-feedback");
+  if (feedback) feedback.textContent = "";
+}
+cardWrap.addEventListener("pointermove", event => {
+  if (pointerStart?.id !== event.pointerId) return;
+  const dx = event.clientX - pointerStart.x;
+  const dy = event.clientY - pointerStart.y;
+  if (Math.abs(dx) < Math.abs(dy) || Math.abs(dx) < 12) return;
+  const panel = cardWrap.querySelector(".portrait");
+  if (!panel) return;
+  panel.style.setProperty("--drag",Math.max(-105,Math.min(105,dx * .6)) + "px");
+  panel.style.setProperty("--tilt",Math.max(-8,Math.min(8,dx / 20)) + "deg");
+  panel.querySelector(".swipe-feedback").textContent = dx > 0 ? "Like" : "Pass";
+});
+cardWrap.addEventListener("pointercancel", clearDrag);
 cardWrap.addEventListener("pointerup", event => {
   if (pointerStart?.id !== event.pointerId) return;
   const dx = event.clientX - pointerStart.x;
   const dy = event.clientY - pointerStart.y;
-  pointerStart = null;
+  clearDrag();
   blockPhotoClick = Math.hypot(dx, dy) > 12;
   if (Math.abs(dx) >= 55 && Math.abs(dx) > 1.35 * Math.abs(dy)) swipe(dx > 0);
 });
+const gallery = document.getElementById("photo-gallery");
+const galleryPhotos = document.getElementById("gallery-photos");
+let galleryIndex = 0;
+function setGalleryPhoto(index){
+  const p = PEOPLE[idx % PEOPLE.length];
+  galleryIndex = (index + 6) % 6;
+  const image = document.getElementById("gallery-image");
+  image.src = `photos/${p.k}-${galleryIndex + 1}.jpg`;
+  image.alt = `${p.name}, photo ${galleryIndex + 1} of 6`;
+  for (const [i,button] of [...galleryPhotos.children].entries()) {
+    button.setAttribute("aria-pressed",String(i === galleryIndex));
+  }
+}
+function openGallery(index){
+  const p = PEOPLE[idx % PEOPLE.length];
+  document.getElementById("gallery-title").textContent = p.name + "’s photos";
+  galleryPhotos.innerHTML = Array.from({length:6},(_,i) => `<button type="button" data-gallery-index="${i}" aria-label="Photo ${i + 1}"><img src="photos/${p.k}-${i+1}.jpg" alt=""></button>`).join("");
+  setGalleryPhoto(index);
+  gallery.showModal();
+}
+galleryPhotos.addEventListener("click",event => {
+  const button = event.target.closest("[data-gallery-index]");
+  if (button) setGalleryPhoto(Number(button.dataset.galleryIndex));
+});
+gallery.addEventListener("keydown",event => {
+  if (!["ArrowLeft","ArrowRight"].includes(event.key)) return;
+  event.preventDefault();
+  setGalleryPhoto(galleryIndex + (event.key === "ArrowRight" ? 1 : -1));
+});
 cardWrap.addEventListener("click", event => {
-  if (!event.target.closest(".photo-tap") || (event.detail && blockPhotoClick) || document.querySelector(".swipe-out")) return;
-  photo = (photo + 1) % 6;
+  if (document.querySelector(".swipe-out")) return;
+  const button = event.target.closest("button");
+  if (!button) return;
+  if (button.hasAttribute("data-photo-index") || button.hasAttribute("data-gallery")) {
+    openGallery(Number(button.dataset.photoIndex ?? photo));
+    return;
+  }
+  if (button.matches(".photo-tap") && event.detail && blockPhotoClick) return;
+  if (!button.matches(".photo-tap,[data-photo-step]")) return;
+  photo = (photo + Number(button.dataset.photoStep ?? 1) + 6) % 6;
   const person = PEOPLE[idx % PEOPLE.length];
-  const image = document.querySelector("#card .portrait img");
+  const image = cardWrap.querySelector(".portrait img");
   image.src = `photos/${person.k}-${photo + 1}.jpg`;
   image.alt = `${person.name}, photo ${photo + 1} of 6`;
-  document.querySelector("#card .photo-count").textContent = `${photo + 1} / 6`;
 });
 function swipe(liked){
   const c = document.getElementById("card");
-  if (c.classList.contains("swipe-out")) return;
+  if (!c || c.classList.contains("swipe-out")) return;
   const p = PEOPLE[idx % PEOPLE.length];
   c.style.setProperty("--dx", liked? "420px":"-420px"); c.style.setProperty("--rot", liked? "12deg":"-12deg");
   c.classList.add("swipe-out");
@@ -677,8 +631,8 @@ function renderLook(){
 renderLook();
 
 // ---------- start ----------
-go("welcome");
-window.addEventListener("hashchange", ()=>{const h=location.hash.slice(1); if(LABELS[h]) go(h);});
+go(views.some(view => view.dataset.view === location.hash.slice(1)) ? location.hash.slice(1) : "welcome",true);
+window.addEventListener("hashchange", () => go(location.hash.slice(1) || "welcome",true));
 </script>
 <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.js"></script>
 <script defer src="supabase-config.js"></script>

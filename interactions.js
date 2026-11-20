@@ -32,13 +32,18 @@
   const profileFields = [
     ['bio','Bio'], ['pronouns','Pronouns'], ['interests','Interests'], ['languages','Languages'],
   ];
+  const sampleLanguages = {
+    june:['English','Spanish'], ivy:['English','Persian'], ava:['English','Persian'],
+    maya:['English','Spanish'], claire:['English','French'],
+  };
+  const matchWindow = 72 * 60 * 60 * 1000;
   const defaults = {
     decisions:{}, matches:['ava'], received:['ava','maya'], blocked:[], reports:[],
     messages:{ava:[{text:'Your farmers market answer won me over.', mine:true},{text:'Want to get dinner this week?'}]},
     filters:{min:18,max:99,distance:50},
     profile:{name:'Sam', age:32, work:'Architect', city:'Chicago', intent:'Long-term relationship', prompt:'A coffee walk is always a yes.', photos:[]},
     wardrobe:CLOSET.map((item, index) => ({id:String(index), name:item.t, icon:item.i, category:categoryByIcon[item.i]})),
-    savedPlaces:[], plans:{}, rewind:null, answers:{}, chatPreferences:{}, paused:false,
+    savedPlaces:[], plans:{}, rewind:null, answers:{}, chatPreferences:{}, deadlines:{}, paused:false,
   };
   const storageKey = 'eshveh.preview.v1';
   let userId;
@@ -106,9 +111,10 @@
 
   const status = el('discover-status');
   function eligible(p) {
-    const {min,max,distance,goal,city} = state.filters;
+    const {min,max,distance,goal,city,language} = state.filters;
     return !state.blocked.includes(p.k) && p.age >= min && p.age <= max && p.mi <= distance &&
-      (!goal || goal === 'Any' || p.intent === goal) && (!city || city === 'Any' || p.city === city);
+      (!goal || goal === 'Any' || p.intent === goal) && (!city || city === 'Any' || p.city === city) &&
+      (!language || language === 'Any' || sampleLanguages[p.k].includes(language));
   }
   function compatibility(p) {
     const answers = sampleAnswers[p.k];
@@ -117,7 +123,7 @@
   }
   function showDiscover(preferred, message = '') {
     const candidate = state.paused ? null : preferred || PEOPLE.find(p => !state.decisions[p.k] && eligible(p));
-    el('nearby-grid').disabled = el('daily-picks').disabled = el('discover-filters').disabled = state.paused;
+    el('nearby-grid').disabled = el('second-look').disabled = el('daily-picks').disabled = el('discover-filters').disabled = state.paused;
     el('rewind').disabled = state.paused || !state.rewind;
     if (state.paused) message = 'Discovery is paused. Resume from Profile.';
     const score = candidate && compatibility(candidate);
@@ -138,7 +144,8 @@
       field('max','Maximum age',max,{type:'number',min:18,max:99}),
       field('distance','Maximum distance (miles)',distance,{type:'number',min:1,max:250}),
       field('goal','Relationship goal',state.filters.goal || 'Any',{choices:['Any',...new Set(PEOPLE.map(p => p.intent))]}),
-      field('city','Demo city',state.filters.city || 'Any',{choices:['Any',...new Set(PEOPLE.map(p => p.city))]}),
+      field('city','Browse a city',state.filters.city || 'Any',{choices:['Any',...new Set(PEOPLE.map(p => p.city))]}),
+      field('language','Language',state.filters.language || 'Any',{choices:['Any',...new Set(Object.values(sampleLanguages).flat())]}),
       button('Reset demo deck', () => {
         state.decisions = {};
         state.rewind = null;
@@ -149,7 +156,7 @@
     ], data => {
       const filters = Object.fromEntries(['min','max','distance'].map(key => [key, Number(data.get(key))]));
       if (filters.min > filters.max) throw Error('Minimum age must be at most the maximum age.');
-      state.filters = {...filters,goal:data.get('goal'),city:data.get('city')};
+      state.filters = {...filters,goal:data.get('goal'),city:data.get('city'),language:data.get('language')};
       save(); showDiscover(); renderProfile();
     }, 'Apply filters');
   };
@@ -157,12 +164,15 @@
   function decide(p, liked, note = '', target = '', priority = false) {
     if (state.paused || state.blocked.includes(p.k)) return;
     state.rewind = {key:p.k, previous:state.decisions[p.k], received:[...state.received],
-      matches:[...state.matches], messageCount:messages(p.k).length};
+      matches:[...state.matches], deadline:state.deadlines[p.k], messageCount:messages(p.k).length};
     el('rewind').disabled = false;
     state.decisions[p.k] = {liked,note,target,priority};
     const incoming = state.received.includes(p.k);
     state.received = state.received.filter(key => key !== p.k);
-    if (liked && incoming && !state.matches.includes(p.k)) state.matches.push(p.k);
+    if (liked && incoming && !state.matches.includes(p.k)) {
+      state.matches.push(p.k);
+      state.deadlines[p.k] = {expires:Date.now()+matchWindow,extended:false};
+    }
     if (liked && incoming && note) messages(p.k).push({text:note,mine:true});
     save();
     showDiscover(undefined, liked ? (incoming ? `You matched with ${p.name}.` : `Like saved for ${p.name} in this demo.`) : '');
@@ -186,6 +196,8 @@
     else delete state.decisions[last.key];
     state.received = last.received;
     state.matches = last.matches;
+    if (last.deadline) state.deadlines[last.key] = last.deadline;
+    else delete state.deadlines[last.key];
     messages(last.key).length = Math.min(messages(last.key).length,last.messageCount);
     state.rewind = null;
     save();
@@ -206,6 +218,7 @@
     openEditor(title,[list],() => {},'Done');
   }
   el('nearby-grid').onclick = () => showProfileGrid('Nearby profiles',PEOPLE.filter(eligible).sort((a,b) => a.mi-b.mi));
+  el('second-look').onclick = () => showProfileGrid('Second look',PEOPLE.filter(p => eligible(p) && state.decisions[p.k]?.liked === false));
   el('daily-picks').onclick = () => {
     const day = Math.floor(Date.now()/86400000);
     const rotated = PEOPLE.map((_,index) => PEOPLE[(index+day)%PEOPLE.length]);
@@ -265,13 +278,40 @@
     }
     if (!list.children.length) list.append(make('p',showArchived ? 'No archived conversations.' : 'New matches will appear here.','pad'));
   }
+  function pendingDeadline(key) {
+    const deadline = state.deadlines[key];
+    return deadline && !messages(key).length && deadline;
+  }
+  function renderDeadline(key, deadline) {
+    const timing = el('match-timing');
+    timing.hidden = !deadline;
+    timing.replaceChildren();
+    if (!deadline) return;
+    const remaining = deadline.expires - Date.now();
+    const expired = remaining <= 0;
+    timing.append(make('p',expired ? 'This sample match expired.' :
+      `Start chatting within ${Math.max(1,Math.ceil(remaining/3600000))} h.`));
+    if (expired || !deadline.extended) {
+      timing.append(button(expired ? 'Rematch' : 'Extend',() => {
+        state.deadlines[key] = {
+          expires:expired ? Date.now()+matchWindow : deadline.expires+matchWindow,
+          extended:!expired,
+        };
+        save(); renderChat(); renderMatches();
+      }));
+    }
+  }
   function renderChat() {
     const p = person(activeMatch);
     const available = !!p && state.matches.includes(p.k);
     el('chat-name').textContent = available ? p.name : 'Messages';
     el('chat-details').textContent = available ? `${p.age} · ${p.mi} mi away` : '';
     el('chat-avatar').replaceChildren(...(available ? [profileImage(p)] : []));
-    el('chat-form').hidden = el('match-options').hidden = el('chat-icebreaker').hidden = !available;
+    const deadline = available && pendingDeadline(p.k);
+    const canMessage = available && (!deadline || deadline.expires > Date.now());
+    el('chat-form').hidden = el('chat-icebreaker').hidden = !canMessage;
+    el('match-options').hidden = !available;
+    renderDeadline(p?.k,deadline);
     const bubbles = el('bubbles');
     bubbles.replaceChildren();
     if (available) {
@@ -300,6 +340,8 @@
     event.preventDefault();
     const text = normalize(el('msg').value);
     if (!text || !state.matches.includes(activeMatch)) return;
+    const deadline = pendingDeadline(activeMatch);
+    if (deadline && deadline.expires <= Date.now()) { renderChat(); return; }
     messages().push({text,mine:true});
     save();
     el('msg').value = '';
