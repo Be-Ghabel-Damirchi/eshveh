@@ -1,112 +1,133 @@
 (() => {
   const panel = document.querySelector('[data-view="account"]');
   const message = panel.querySelector('[role="status"]');
-  const google = panel.querySelector('[data-google]');
-  let auth;
-  let supabase;
-  const supabaseConfig = window.ESHVEH_SUPABASE_CONFIG;
-  if (supabaseConfig?.url && supabaseConfig?.publishableKey && window.supabase) {
-    supabase = window.supabase.createClient(supabaseConfig.url, supabaseConfig.publishableKey, {
-      auth: {flowType:'pkce'},
-    });
-    const returning = new URLSearchParams(location.search).has('code');
-    supabase.auth.onAuthStateChange((event, session) => {
-      const data = session?.user?.user_metadata;
-      updateProfile({photoURL:data?.avatar_url || data?.picture});
-      if (session && (returning || event === 'SIGNED_IN') && document.querySelector('[data-view="welcome"].on')) go('discover');
-      if (returning && session) {
-        const url = new URL(location.href);
-        url.searchParams.delete('code');
-        history.replaceState(null,'',url);
-      }
-    });
-  }
-
-  function updateProfile(user) {
-    document.querySelectorAll('[data-google-avatar]').forEach(image => {
-      const fallback = image.parentElement.querySelector('[data-avatar-fallback]');
-      image.hidden = true;
-      fallback.hidden = false;
-      image.onload = () => {
-        image.hidden = false;
-        fallback.hidden = true;
-      };
-      image.onerror = () => {
-        image.hidden = true;
-        fallback.hidden = false;
-      };
-      if (user?.photoURL) image.src = user.photoURL;
-      else image.removeAttribute('src');
-    });
-  }
-
-  function getAuth(config) {
-    if (!auth) {
-      auth = firebase.initializeApp(config).auth();
-      auth.onAuthStateChanged(updateProfile);
-    }
-    return auth;
-  }
-
-  const config = window.ESHVEH_FIREBASE_CONFIG;
-  if (config?.apiKey && window.firebase) getAuth(config);
+  const sync = document.getElementById('sync-status');
+  const form = panel.querySelector('form');
+  const logout = document.getElementById('sign-out');
+  const config = window.ESHVEH_SUPABASE_CONFIG;
+  const client = window.supabase?.createClient(config.url, config.publishableKey, {
+    auth: {flowType:'pkce'},
+  });
+  const redirectTo = new URL('.', location.href).href;
+  let mode = 'returning';
+  let loadedUser = null;
+  let loading = false;
+  let queue = Promise.resolve();
 
   document.querySelectorAll('[data-account]').forEach(button => {
     button.onclick = () => {
-      panel.querySelector('h2').textContent = button.dataset.account === 'new' ? 'Create your account' : 'Welcome back';
+      mode = button.dataset.account;
+      panel.querySelector('h2').textContent = mode === 'new' ? 'Create your account' : 'Welcome back';
+      form.querySelector('[type="submit"]').textContent = mode === 'new' ? 'Create account' : 'Sign in';
+      form.elements.password.autocomplete = mode === 'new' ? 'new-password' : 'current-password';
+      panel.querySelector('[data-age-check]').hidden = mode !== 'new';
+      form.elements.adult.required = mode === 'new';
+      form.elements.email.pattern = mode === 'new' ? '[^@]+@[gG][mM][aA][iI][lL][.][cC][oO][mM]' : '';
+      if (mode !== 'new') form.elements.email.removeAttribute('pattern');
+      panel.querySelector('[data-email-label]').textContent = mode === 'new' ? 'Gmail address' : 'Email';
       message.textContent = '';
       go('account');
     };
   });
 
-  google.onclick = async () => {
-    if (supabase) {
-      google.disabled = true;
-      message.textContent = '';
-      try {
-        const settingsResponse = await fetch(new URL('/auth/v1/settings', supabaseConfig.url), {
-          headers: {apikey: supabaseConfig.publishableKey},
-        });
-        if (!settingsResponse.ok) throw Error('Could not load Supabase authentication settings.');
-        const settings = await settingsResponse.json();
-        if (!settings.external?.google) {
-          message.textContent = 'Google sign-in is awaiting activation. Select Explore demo to try Eshveh.';
-          google.disabled = false;
-          return;
-        }
-        const redirectTo = new URL('.', location.href).href;
-        const {error} = await supabase.auth.signInWithOAuth({provider:'google',options:{redirectTo}});
-        if (error) throw error;
-      } catch {
-        message.textContent = 'Google sign-in could not start. Please try again.';
-        google.disabled = false;
+  async function loadAccount(user) {
+    if (loading || loadedUser === user.id) return;
+    loading = true;
+    try {
+      const {data,error} = await client.from('eshveh_preview_state').select('state').eq('user_id',user.id).maybeSingle();
+      if (error) throw error;
+      const state = data?.state ?? {};
+      if (!data && user.user_metadata?.full_name) {
+        state.profile = {name:user.user_metadata.full_name};
       }
-      return;
+      window.loadEshvehPreview(state, user.id);
+      loadedUser = user.id;
+      logout.hidden = false;
+      sync.textContent = 'Signed in. Changes sync to your account.';
+      go('discover');
+    } catch {
+      message.textContent = 'Your account data could not load. Please try signing in again.';
+      go('account');
+    } finally {
+      loading = false;
     }
-    if (!config?.apiKey) {
-      message.textContent = 'Google sign-in isn’t set up yet. Select Explore demo to browse the sample profiles.';
-      return;
+  }
+
+  window.saveEshvehPreview = (userId, state) => {
+    if (!client || userId !== loadedUser) return;
+    const snapshot = structuredClone(state);
+    sync.textContent = 'Saving changes…';
+    queue = queue.catch(() => {}).then(async () => {
+      if (userId !== loadedUser) return;
+      try {
+        const {error} = await client.from('eshveh_preview_state').upsert({user_id:userId,state:snapshot});
+        if (error) throw error;
+        sync.textContent = 'Changes saved to your account.';
+      } catch {
+        sync.textContent = 'Cloud save failed. Your changes are saved on this device if space is available.';
+      }
+    });
+  };
+
+  client?.auth.onAuthStateChange((event, session) => {
+    if (session && ['INITIAL_SESSION','SIGNED_IN'].includes(event)) {
+      setTimeout(() => loadAccount(session.user),0);
     }
-    if (!window.firebase) {
-      message.textContent = 'Could not load Google sign-in. Check your connection and try again.';
-      return;
-    }
-    google.disabled = true;
+  });
+
+  form.onsubmit = async event => {
+    event.preventDefault();
+    const submit = form.querySelector('[type="submit"]');
+    submit.disabled = true;
     message.textContent = '';
     try {
-      const result = await getAuth(config).signInWithPopup(new firebase.auth.GoogleAuthProvider());
-      updateProfile(result.user);
-      go('discover');
+      if (!client) throw Error('Sign-in is temporarily unavailable.');
+      const credentials = {email:form.elements.email.value.trim(),password:form.elements.password.value};
+      const {data,error} = mode === 'new'
+        ? await client.auth.signUp({...credentials,options:{emailRedirectTo:redirectTo}})
+        : await client.auth.signInWithPassword(credentials);
+      if (error) throw error;
+      form.reset();
+      if (data.session) await loadAccount(data.user);
+      else message.textContent = 'Check your email for a confirmation link, then return here to sign in.';
     } catch (error) {
-      const messages = {
-        'auth/unauthorized-domain': 'This website must be added to the Firebase authorized domains.',
-        'auth/operation-not-allowed': 'Google sign-in must be enabled in Firebase.',
-        'auth/popup-closed-by-user': 'Google sign-in was closed. You can try again.',
-        'auth/popup-blocked': 'Allow pop-ups for this website and try again.',
-      };
-      message.textContent = messages[error.code] || 'Google sign-in failed. Please try again.';
+      message.textContent = error.message;
     } finally {
-      google.disabled = false;
+      submit.disabled = false;
+    }
+  };
+
+  panel.querySelector('[data-google]').onclick = async () => {
+    try {
+      if (!client) throw Error('Sign-in is temporarily unavailable.');
+      const response = await fetch(new URL('/auth/v1/settings', config.url), {
+        headers:{apikey:config.publishableKey},
+      });
+      if (!response.ok) throw Error('Could not check Google sign-in.');
+      const settings = await response.json();
+      if (!settings.external?.google) throw Error('Google sign-in is awaiting activation. You can use email.');
+      const {error} = await client.auth.signInWithOAuth({provider:'google',options:{redirectTo}});
+      if (error) throw error;
+    } catch (error) {
+      message.textContent = error.message;
+    }
+  };
+
+  logout.onclick = async () => {
+    logout.disabled = true;
+    try {
+      await queue;
+      const {error} = await client.auth.signOut();
+      if (error) throw error;
+      loadedUser = null;
+      logout.hidden = true;
+      sync.textContent = '';
+      window.loadEshvehPreview(null,null);
+      go('welcome');
+    } catch {
+      sync.textContent = 'Could not sign out. Please try again.';
+    } finally {
+      logout.disabled = false;
     }
   };
 })();

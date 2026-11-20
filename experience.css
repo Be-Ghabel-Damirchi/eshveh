@@ -1,0 +1,20 @@
+:root { --accent: #afff42; }
+body { font-family: Geist, system-ui, sans-serif; }
+.view .top { gap: 12px; }
+.btn.solid, .chip.solid, .round.solid { background: #17191a; color: var(--accent); }
+.btn, .chip, .round, .spot, .nearby-card { transition: background-color 150ms, border-color 150ms, transform 150ms; }
+.btn:active, .chip:active, .round:active, .nearby-card:active { transform: scale(.97); }
+:where(button, input, select, textarea):focus-visible { outline: 2px solid #547d14; outline-offset: 3px; }
+button:disabled { opacity: .48; cursor: default; }
+.discovery-tools { display: flex; flex-wrap: wrap; gap: 6px; padding: 0 16px 10px; }
+.nearby-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 8px; }
+.nearby-card { overflow: hidden; display: grid; gap: 5px; padding: 0 0 6px; background: white; text-align: center; border: 1px solid #deded9; border-radius: 10px; font-size: 12px; }
+.nearby-card img { width: 100%; aspect-ratio: 1; object-fit: cover; }
+.date-inputs { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 8px; }
+.account-panel label, .date-inputs label { display: grid; gap: 5px; font-size: 12px; }
+.account-panel label[data-age-check]:not([hidden]) { display: flex; align-items: center; }
+.account-panel input:not([type=checkbox]), .date-inputs input, .date-inputs select { min-width: 0; padding: 9px; color: #17191a; background: #f6f7f4; border: 1px solid #d9dcd5; border-radius: 7px; font: inherit; }
+.date-vote { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding-top: 8px; font-size: 12px; }
+.date-vote:empty { display: none; }
+.spot[hidden], [data-age-check][hidden], #sign-out[hidden] { display: none; }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition-duration: 0ms !important; animation-duration: 0ms !important; } }

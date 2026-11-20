@@ -249,11 +249,8 @@ code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;ba
 .edit-actions,.plan-controls,.profile-photos{display:flex;gap:8px;flex-wrap:wrap}
 .profile-photos{padding:12px 22px}.profile-photos img{width:72px;height:86px;object-fit:cover;border-radius:8px}
 #discover-status[hidden],#chat-form[hidden]{display:none}.composer input{min-width:0}.liked-profile{flex-wrap:wrap}.liked-profile .chip{margin-left:0}
-.discover-modes{display:flex;gap:8px;flex-wrap:wrap}
-.profile-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;padding:12px 18px}
-.profile-grid button{display:grid;gap:6px;text-align:left}
-.profile-grid img{width:100%;height:136px;object-fit:cover;border-radius:10px}
 </style>
+<link rel="stylesheet" href="experience.css">
 </head>
 <body>
 <div class="wall">
@@ -291,7 +288,12 @@ code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;ba
           <div class="pad account-panel">
             <button class="btn line" type="button" data-go="welcome">Back</button>
             <h2>Create your account</h2>
-            <p>Use your Google account to continue.</p>
+            <form class="account-panel">
+              <label><span data-email-label>Gmail address</span><input type="email" name="email" required autocomplete="email" placeholder="you@gmail.com"></label>
+              <label>Password <input type="password" name="password" required minlength="6"></label>
+              <label data-age-check hidden><input type="checkbox" name="adult"> I am 18 or older</label>
+              <button class="btn solid" type="submit">Sign in</button>
+            </form>
             <button class="btn solid" type="button" data-google>Continue with Google</button>
             <p role="status" aria-live="polite"></p>
             <button class="btn line" type="button" data-go="discover">Explore demo</button>
@@ -304,12 +306,7 @@ code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;ba
             <button class="icon-btn" aria-label="Filters" id="discover-filters"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg></button>
           </div>
           <p class="swipe-hint">Tap for the next photo. Swipe right to like or left to pass.</p>
-          <p id="discover-status" class="swipe-hint" role="status" hidden></p><div class="pad discover-modes">
-            <button class="chip" id="browse-grid" type="button">Nearby grid</button>
-            <button class="chip" id="daily-picks" type="button">Daily picks</button>
-            <button class="chip" id="undo-decision" type="button">Undo last swipe</button>
-          </div>
-          <div id="cardwrap"></div>
+          <div class="discovery-tools" aria-label="Discovery tools"><button class="chip" id="nearby-grid" type="button">Nearby grid</button><button class="chip" id="rewind" type="button">Undo</button><button class="chip" id="priority-like" type="button">Priority like</button></div><p id="discover-status" class="swipe-hint" role="status" hidden></p><div id="cardwrap"></div>
           <div class="actions">
             <button class="round" id="pass" aria-label="Pass"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
             <button class="chip" id="comment-like" type="button">Like with a note</button><button class="round solid" id="like" aria-label="Like"><svg viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg></button>
@@ -322,7 +319,7 @@ code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;ba
           <div class="pair"><div class="av" id="av-me"></div><div class="av" id="av-them"></div></div>
           <div class="h-display">It's a <i>match.</i></div>
           <p>We already found three great spots halfway between you and Ava.</p>
-          <button class="btn solid" data-go="plan">See your date spots</button>
+          <button class="btn solid" data-go="plan">Plan a date</button>
           <button class="btn line" data-go="chat">Say hi first</button>
         </div>
 
@@ -352,9 +349,9 @@ code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;ba
         <div class="view" data-view="plan">
           <div class="top" style="justify-content:flex-start;gap:12px">
             <button class="icon-btn" data-go="chat" aria-label="Back"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M15 5l-7 7 7 7"/></svg></button>
-            <span><span class="eyebrow">Date with <span id="plan-person">Ava</span></span><br><span class="h-display" style="font-size:26px">Three spots, <i>halfway.</i></span></span>
+            <span><span class="eyebrow">Date with <span id="plan-person">Ava</span></span><br><span class="h-display" style="font-size:26px">Plan a <i>date.</i></span></span>
           </div>
-          <div class="when" id="when"></div>
+          <div class="when" id="when"></div><div class="pad date-inputs"><label>Your neighborhood<input id="date-origin" value="Arlington" maxlength="80"></label><label>Sample match’s neighborhood<input id="date-destination" value="Dallas" maxlength="80"></label><label>Budget<select id="date-budget"><option value="">Any</option><option value="$">$</option><option value="$$">$$</option><option value="$$$">$$$</option></select></label></div>
           <div class="pad plan-controls"><label>Date and time <input type="datetime-local" id="custom-date"></label><button class="chip" id="save-place" type="button">Save place</button><p id="place-status" role="status"></p><div id="saved-places" aria-label="Saved places"></div></div>
           <div class="mapbox">
             <svg viewBox="0 0 340 190" aria-label="Map showing you, Ava, the midpoint and three spots">
@@ -375,7 +372,7 @@ code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;ba
           </div>
           <div class="spots" id="spots"></div>
           <div class="sticky-cta">
-            <button class="btn solid" id="send-plan">Send to Ava</button>
+            <button class="btn solid" id="send-plan">Vote for this spot</button><div id="date-vote" class="date-vote" aria-live="polite"></div>
           </div>
         </div>
 
@@ -416,8 +413,7 @@ code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;ba
         <div class="view" data-view="profile">
           <div class="top"><span class="wordmark">Profile</span><button class="chip" id="edit-profile" type="button">Edit</button></div>
           <div class="prof-head"><span class="av-s" data-portrait="sam" data-avatar-fallback></span><img class="av-s account-avatar" data-google-avatar hidden alt=""><span><span class="h-display" id="account-name" style="font-size:30px">Sam, 32</span><br><span class="muted" id="profile-details" style="font-size:13px">Architect · Chicago</span></span></div>
-          <div class="pad discover-modes"><button class="chip" id="preview-profile" type="button">Preview profile</button><button class="chip" id="privacy-settings" type="button">Privacy</button></div>
-          <div class="list" id="profile-info"></div><div class="profile-photos" id="profile-photos"></div>
+          <div class="pad"><p id="sync-status" role="status"></p><button class="chip" type="button" id="sign-out" hidden>Sign out</button></div><div class="list" id="profile-info"></div><div class="profile-photos" id="profile-photos"></div>
         </div>
 
         <nav class="tabs" id="tabs">
@@ -468,7 +464,7 @@ code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;ba
     <section>
       <span class="eyebrow">Your launch plan</span>
       <h2>Eight steps from <i>here</i> to the App Store.</h2>
-      <p class="lede">Step 1 is done. The backend and the app code are written and tested. The next steps are mostly accounts and paperwork that need you personally.</p>
+      <p class="lede">The preview uses fictional people and venues. Use it to try discovery, date planning, and wardrobe features.</p>
       <div class="roadmap">
         <div class="step is-done"><span class="num">01</span><div><h3>Build the first version</h3>
           <p>Backend (Python + FastAPI) and the iPhone/Android app (React Native + Expo).</p>
@@ -614,13 +610,18 @@ document.getElementById("pass").onclick = ()=>swipe(false);
 renderCard();
 
 // ---------- date plan ----------
-const DAYS = ["Fri, Nov 27 · 7:30 PM","Sat, Nov 28 · 8:00 PM","Sun, Nov 29 · 11:00 AM"];
+const DAYS = [1,2,3].map(offset => {
+  const date = new Date();
+  date.setDate(date.getDate() + offset);
+  date.setHours(19,0,0,0);
+  return date.toLocaleString(undefined,{weekday:'short',month:'short',day:'numeric',hour:'numeric',minute:'2-digit'});
+});
 const when = document.getElementById("when");
 DAYS.forEach((d,i)=>{const b=document.createElement("button");b.className="chip"+(i===0?" solid":"");b.textContent=d;b.onclick=()=>{when.querySelectorAll(".chip").forEach(x=>x.classList.remove("solid"));b.classList.add("solid");};when.appendChild(b);});
 const SPOTS = [
-  {name:"Maison Lune",kind:"French bistro",vibe:"Upscale",price:"$$$",rating:4.7,reviews:1284,you:14,them:12,x:168,y:78},
-  {name:"Hollow Coffee & Wine",kind:"Café · wine bar",vibe:"Casual",price:"$",rating:4.6,reviews:812,you:11,them:15,x:205,y:110},
-  {name:"Osteria Verde",kind:"Italian",vibe:"Smart casual",price:"$$",rating:4.5,reviews:2051,you:16,them:13,x:160,y:120},
+  {name:"Maison Lune",area:"Balanced drive",hours:"5–10 PM",kind:"French bistro",vibe:"Upscale",price:"$$$",rating:4.7,reviews:1284,you:14,them:12,x:168,y:78},
+  {name:"Hollow Coffee & Wine",area:"Near you",hours:"9 AM–10 PM",kind:"Café · wine bar",vibe:"Casual",price:"$",rating:4.6,reviews:812,you:11,them:15,x:205,y:110},
+  {name:"Osteria Verde",area:"Near your match",hours:"11 AM–10 PM",kind:"Italian",vibe:"Smart casual",price:"$$",rating:4.5,reviews:2051,you:16,them:13,x:160,y:120},
 ];
 let chosen = 0;
 function renderSpots(){
@@ -629,7 +630,7 @@ function renderSpots(){
     return `<button class="spot${i===chosen?" on":""}" data-i="${i}" aria-pressed="${i===chosen}">
       <span class="n">${i+1}</span>
       <span><h4>${s.name}</h4><div class="sub">${s.kind} · ${s.price} · ${s.vibe}</div>
-      <div class="facts"><span>★ ${s.rating.toFixed(1)} <span class="muted">(${s.reviews.toLocaleString()})</span></span><span>Sample listing</span></div>
+      <div class="facts"><span>★ ${s.rating.toFixed(1)} <span class="muted">(${s.reviews.toLocaleString()})</span></span><span>${s.area} · ${s.hours}</span></div>
       <div class="bar"><span style="width:34px">You</span><i style="width:${s.you/max*120}px"></i><span>${s.you} min</span></div>
       <div class="bar"><span style="width:34px">Ava</span><i class="them" style="width:${s.them/max*120}px;background:#9d9c97"></i><span>${s.them} min</span></div></span></button>`;
   }).join("");
@@ -679,12 +680,9 @@ renderLook();
 go("welcome");
 window.addEventListener("hashchange", ()=>{const h=location.hash.slice(1); if(LABELS[h]) go(h);});
 </script>
-<script defer src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
-<script defer src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
-<script defer src="firebase-config.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.js"></script>
 <script defer src="supabase-config.js"></script>
-<script defer src="account.js"></script>
 <script defer src="interactions.js"></script>
+<script defer src="account.js"></script>
 </body>
 </html>
