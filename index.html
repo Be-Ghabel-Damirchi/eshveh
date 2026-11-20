@@ -240,6 +240,15 @@ code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;ba
 .swipe-hint{padding:8px 16px;font-size:13px;text-align:center;color:var(--graphite)}
 .liked-profile{display:flex;align-items:center;gap:14px;text-align:left;width:100%;padding:12px 0;border-bottom:1px solid var(--hair)}
 .liked-profile img{width:56px;height:64px;object-fit:cover;border-radius:8px}
+.edit-dialog{width:min(340px,calc(100% - 28px));max-height:85vh;overflow:auto;border:1px solid var(--hair);border-radius:18px;padding:20px;color:var(--ink)}
+.edit-dialog::backdrop{background:#0008}
+.edit-dialog form,.edit-fields{display:grid;gap:12px}
+.edit-dialog h2{font-family:var(--display);font-size:30px}
+.edit-fields label,.plan-controls label{display:grid;gap:4px;font-size:13px}
+.edit-fields input,.edit-fields textarea,.edit-fields select,.plan-controls input{width:100%;padding:8px;border:1px solid #999;border-radius:6px;background:#fff;color:#151515;font:inherit}
+.edit-actions,.plan-controls,.profile-photos{display:flex;gap:8px;flex-wrap:wrap}
+.profile-photos{padding:12px 22px}.profile-photos img{width:72px;height:86px;object-fit:cover;border-radius:8px}
+#discover-status[hidden],#chat-form[hidden]{display:none}.composer input{min-width:0}.liked-profile{flex-wrap:wrap}.liked-profile .chip{margin-left:0}
 </style>
 </head>
 <body>
@@ -288,13 +297,13 @@ code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;ba
         <!-- 2 Discover -->
         <div class="view" data-view="discover">
           <div class="top"><span class="wordmark"><img class="discover-logo" src="eshveh-logo.png" alt="Eshveh"></span>
-            <button class="icon-btn" aria-label="Filters"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg></button>
+            <button class="icon-btn" aria-label="Filters" id="discover-filters"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg></button>
           </div>
           <p class="swipe-hint">Tap for the next photo. Swipe right to like or left to pass.</p>
-          <div id="cardwrap"></div>
+          <p id="discover-status" class="swipe-hint" role="status" hidden></p><div id="cardwrap"></div>
           <div class="actions">
             <button class="round" id="pass" aria-label="Pass"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
-            <button class="round solid" id="like" aria-label="Like"><svg viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg></button>
+            <button class="chip" id="comment-like" type="button">Like with a note</button><button class="round solid" id="like" aria-label="Like"><svg viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg></button>
           </div>
         </div>
 
@@ -311,43 +320,33 @@ code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;ba
         <!-- 4 Matches list -->
         <div class="view" data-view="matches">
           <div class="top"><span class="wordmark">Matches</span></div>
-          <div class="pad" style="padding-top:0"><span class="eyebrow">New</span></div>
-          <div style="display:flex;gap:12px;padding:0 22px 18px">
-            <button data-go="chat" style="display:grid;gap:6px;justify-items:center;font-size:12px"><span class="av-s" style="width:64px;height:64px" data-portrait="ava"></span>Ava</button>
-            <button style="display:grid;gap:6px;justify-items:center;font-size:12px"><span class="av-s" style="width:64px;height:64px" data-portrait="mia"></span>Mia</button>
-          </div>
-          <div class="pad" style="padding-bottom:4px"><span class="eyebrow">Messages</span></div>
-          <button class="row" data-go="chat"><span class="av-s" data-portrait="ava"></span><span><b>Ava</b><p>Friday works. Is Maison Lune okay?</p></span><span class="new-dot"></span></button>
-          <button class="row"><span class="av-s" data-portrait="nora"></span><span><b>Nora</b><p>Ha, that's exactly my Sunday too</p></span></button>
-          <button class="row"><span class="av-s" data-portrait="lena"></span><span><b>Lena</b><p>You: Have you tried the café on Damen?</p></span></button>
+          <div id="match-list"></div>
         </div>
 
         <!-- 5 Chat -->
         <div class="view" data-view="chat">
           <div class="top" style="justify-content:flex-start;gap:12px">
             <button class="icon-btn" data-go="matches" aria-label="Back"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M15 5l-7 7 7 7"/></svg></button>
-            <span class="av-s" style="width:38px;height:38px" data-portrait="ava"></span>
-            <span><b style="font-weight:500">Ava</b><br><span class="muted" style="font-size:12px">29 · 4 mi away</span></span>
+            <span class="av-s" style="width:38px;height:38px" id="chat-avatar" data-portrait="ava"></span>
+            <span><b id="chat-name" style="font-weight:500">Ava</b><br><span class="muted" id="chat-details" style="font-size:12px"></span></span>
           </div>
-          <div class="bubbles" id="bubbles">
-            <span class="stamp">Today 6:12 PM</span>
-            <div class="b me">Your farmers market answer won me over.</div>
-            <div class="b them">Ha. Saturday mornings are sacred. Want to get dinner this week?</div>
-            <div class="b me">Yes. Eshveh picked three places halfway between us.</div>
-          </div>
-          <div class="composer">
-            <button class="chip solid" data-go="plan">Plan a date</button>
-            <input id="msg" placeholder="Message Ava" aria-label="Message">
-          </div>
+          <div class="bubbles" id="bubbles" aria-live="polite"></div>
+          <form class="composer" id="chat-form">
+            <button type="button" class="chip line" data-go="plan">Plan a date</button>
+            <input id="msg" required maxlength="500" placeholder="Message" aria-label="Message">
+            <button class="chip solid" type="submit">Send</button>
+          </form>
+          <div class="pad"><button class="chip" id="match-options" type="button">Match options</button></div>
         </div>
 
         <!-- 6 Date plan -->
         <div class="view" data-view="plan">
           <div class="top" style="justify-content:flex-start;gap:12px">
             <button class="icon-btn" data-go="chat" aria-label="Back"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M15 5l-7 7 7 7"/></svg></button>
-            <span><span class="eyebrow">Date with Ava</span><br><span class="h-display" style="font-size:26px">Three spots, <i>halfway.</i></span></span>
+            <span><span class="eyebrow">Date with <span id="plan-person">Ava</span></span><br><span class="h-display" style="font-size:26px">Three spots, <i>halfway.</i></span></span>
           </div>
           <div class="when" id="when"></div>
+          <div class="pad plan-controls"><label>Date and time <input type="datetime-local" id="custom-date"></label><button class="chip" id="save-place" type="button">Save place</button><p id="place-status" role="status"></p><div id="saved-places" aria-label="Saved places"></div></div>
           <div class="mapbox">
             <svg viewBox="0 0 340 190" aria-label="Map showing you, Ava, the midpoint and three spots">
               <defs><pattern id="g" width="20" height="20" patternUnits="userSpaceOnUse"><path d="M20 0H0V20" fill="none" stroke="#ecebe7" stroke-width="1"/></pattern></defs>
@@ -379,7 +378,7 @@ code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;ba
             <label class="tile add" for="upload"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Add a piece<input type="file" id="upload" accept="image/*"></label>
           </div>
           <div class="sticky-cta">
-            <button class="btn solid" data-go="looks">Style me for Friday</button>
+            <button class="btn solid" data-go="looks">Build an outfit</button>
           </div>
         </div>
 
@@ -387,7 +386,7 @@ code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;ba
         <div class="view" data-view="looks">
           <div class="top" style="justify-content:flex-start;gap:12px">
             <button class="icon-btn" data-go="closet" aria-label="Back"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M15 5l-7 7 7 7"/></svg></button>
-            <span><span class="eyebrow">Friday · Maison Lune</span><br><span class="h-display" style="font-size:26px">Three looks, <i>yours.</i></span></span>
+            <span><span class="eyebrow">Sample date conditions</span><br><span class="h-display" style="font-size:26px">Three looks, <i>yours.</i></span></span>
           </div>
           <div class="wx">
             <span class="t">48°</span>
@@ -406,16 +405,9 @@ code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;ba
         </div>
 
         <div class="view" data-view="profile">
-          <div class="top"><span class="wordmark">Profile</span><button class="chip">Edit</button></div>
-          <div class="prof-head"><span class="av-s" data-portrait="sam" data-avatar-fallback></span><img class="av-s account-avatar" data-google-avatar hidden alt=""><span><span class="h-display" id="account-name" style="font-size:30px">Sam, 32</span><br><span class="muted" style="font-size:13px">Architect · Chicago</span></span></div>
-          <div class="list">
-            <div><span>Looking for</span><span>Women, 25–35</span></div>
-            <div><span>Distance</span><span>Up to 15 mi</span></div>
-            <div><span>Getting to dates</span><span>Drive</span></div>
-            <div><span>Location</span><span>On, never shown to others</span></div>
-            <div><span>Verified</span><span>Selfie check</span></div>
-            <div><span>Safety</span><span>Block & report</span></div>
-          </div>
+          <div class="top"><span class="wordmark">Profile</span><button class="chip" id="edit-profile" type="button">Edit</button></div>
+          <div class="prof-head"><span class="av-s" data-portrait="sam" data-avatar-fallback></span><img class="av-s account-avatar" data-google-avatar hidden alt=""><span><span class="h-display" id="account-name" style="font-size:30px">Sam, 32</span><br><span class="muted" id="profile-details" style="font-size:13px">Architect · Chicago</span></span></div>
+          <div class="list" id="profile-info"></div><div class="profile-photos" id="profile-photos"></div>
         </div>
 
         <nav class="tabs" id="tabs">
@@ -506,6 +498,7 @@ code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;ba
   </main>
 </div>
 
+<dialog class="edit-dialog" id="editor"><form id="editor-form"><h2 id="editor-title"></h2><div class="edit-fields" id="editor-fields"></div><p id="editor-error" role="status"></p><div class="edit-actions"><button class="chip solid" type="submit" id="editor-save">Save</button><button class="chip" type="button" id="editor-cancel">Cancel</button></div></form></dialog>
 <script>
 // ---------- portraits: abstract monochrome silhouettes (no real photos) ----------
 const TONES = {ava:["#2b2b2b","#8a8a86"],mia:["#3c3c3a","#b9b8b3"],nora:["#1c1c1c","#6f6f6c"],lena:["#4a4a47","#cfcec9"],sam:["#151515","#9d9c97"],june:["#333","#aaa9a4"],ivy:["#222","#c4c3be"]};
@@ -604,27 +597,11 @@ function swipe(liked){
   const p = PEOPLE[idx % PEOPLE.length];
   c.style.setProperty("--dx", liked? "420px":"-420px"); c.style.setProperty("--rot", liked? "12deg":"-12deg");
   c.classList.add("swipe-out");
-  setTimeout(()=>{ idx++; photo = 0; renderCard(); if(liked && p.k==="ava") go("match"); }, 320);
+  setTimeout(()=>{ if (window.eshvehDecide) window.eshvehDecide(p, liked); else { idx++; photo = 0; renderCard(); } }, 320);
 }
 document.getElementById("like").onclick = ()=>swipe(true);
 document.getElementById("pass").onclick = ()=>swipe(false);
 renderCard();
-
-const receivedLikes = document.getElementById("received-likes");
-PEOPLE.filter(p => ["ava", "maya"].includes(p.k)).forEach(p => {
-  const button = document.createElement("button");
-  button.className = "liked-profile";
-  button.type = "button";
-  button.innerHTML = `<img src="photos/${p.k}-1.jpg" alt=""><span><strong>${p.name}, ${p.age}</strong><br>${p.city}</span>`;
-  button.onclick = () => {
-    if (document.querySelector(".swipe-out")) return;
-    idx = PEOPLE.indexOf(p);
-    photo = 0;
-    renderCard();
-    go("discover");
-  };
-  receivedLikes.appendChild(button);
-});
 
 // ---------- date plan ----------
 const DAYS = ["Fri, Nov 27 · 7:30 PM","Sat, Nov 28 · 8:00 PM","Sun, Nov 29 · 11:00 AM"];
@@ -642,7 +619,7 @@ function renderSpots(){
     return `<button class="spot${i===chosen?" on":""}" data-i="${i}" aria-pressed="${i===chosen}">
       <span class="n">${i+1}</span>
       <span><h4>${s.name}</h4><div class="sub">${s.kind} · ${s.price} · ${s.vibe}</div>
-      <div class="facts"><span>★ ${s.rating.toFixed(1)} <span class="muted">(${s.reviews.toLocaleString()})</span></span><span>Open at 7:30 PM</span></div>
+      <div class="facts"><span>★ ${s.rating.toFixed(1)} <span class="muted">(${s.reviews.toLocaleString()})</span></span><span>Sample listing</span></div>
       <div class="bar"><span style="width:34px">You</span><i style="width:${s.you/max*120}px"></i><span>${s.you} min</span></div>
       <div class="bar"><span style="width:34px">Ava</span><i class="them" style="width:${s.them/max*120}px;background:#9d9c97"></i><span>${s.them} min</span></div></span></button>`;
   }).join("");
@@ -651,22 +628,6 @@ function renderSpots(){
   document.getElementById("send-plan").textContent = `Send ${SPOTS[chosen].name} to Ava`;
 }
 renderSpots();
-document.getElementById("send-plan").onclick = ()=>{
-  const s = SPOTS[chosen]; const day = when.querySelector(".solid").textContent;
-  const bub = document.getElementById("bubbles");
-  bub.insertAdjacentHTML("beforeend", `<div class="plan-card"><div class="ph">${s.name}</div><div class="bd"><b>${day}</b><span>${s.kind} · ★ ${s.rating} · ${s.you} min for you, ${s.them} for Ava</span></div></div>
-    <div class="b them">Ooh, I've wanted to try ${s.name.split(" ")[0]}. Yes!</div>
-    <div class="b me">Perfect. Picking my outfit now.</div>`);
-  go("chat"); setTimeout(()=>bub.parentElement.scrollTop = 99999, 50);
-};
-document.getElementById("msg").addEventListener("keydown", e=>{
-  if(e.key==="Enter" && e.target.value.trim()){
-    const d=document.createElement("div"); d.className="b me"; d.textContent=e.target.value.trim();
-    document.getElementById("bubbles").appendChild(d); e.target.value="";
-    d.scrollIntoView({block:"end"});
-  }
-});
-
 // ---------- closet ----------
 const ICON = {
   shirt:'<path d="M8 4l-5 3 2 5 3-1v10h8V11l3 1 2-5-5-3c-.5 1.5-2 2.5-4 2.5S8.5 5.5 8 4z"/><path d="M12 6.5V21"/>',
@@ -686,20 +647,6 @@ const CLOSET = [
   {i:"jeans",t:"Dark jeans"},{i:"loafers",t:"Brown loafers"},{i:"sneakers",t:"White sneakers"},{i:"watch",t:"Silver watch"},
 ];
 const grid = document.getElementById("grid");
-CLOSET.forEach(c=>grid.insertAdjacentHTML("beforeend", `<div class="tile"><svg viewBox="0 0 24 24">${ICON[c.i]}</svg><span class="tag">${c.t}</span></div>`));
-document.getElementById("upload").addEventListener("change", e=>{
-  const f = e.target.files[0]; if(!f) return;
-  const r = new FileReader();
-  r.onload = ()=>{
-    const t = document.createElement("div"); t.className="tile scanning";
-    t.innerHTML = `<img alt="Your uploaded piece" src="${r.result}"><span class="tag">Claude is tagging…</span>`;
-    grid.children[0].after(t);
-    setTimeout(()=>{t.classList.remove("scanning"); t.querySelector(".tag").textContent="Tagged · smart casual";
-      document.getElementById("count").textContent = (grid.children.length-1)+" pieces";},1600);
-  };
-  r.readAsDataURL(f); e.target.value="";
-});
-
 // ---------- looks ----------
 const LOOKS = [
   {name:"The Classic",items:[["coat","Camel overcoat"],["shirt","White oxford"],["trousers","Charcoal trousers"],["loafers","Brown loafers"]],
@@ -726,5 +673,6 @@ window.addEventListener("hashchange", ()=>{const h=location.hash.slice(1); if(LA
 <script defer src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
 <script defer src="firebase-config.js"></script>
 <script defer src="account.js"></script>
+<script defer src="interactions.js"></script>
 </body>
 </html>

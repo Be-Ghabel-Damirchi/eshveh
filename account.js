@@ -5,7 +5,6 @@
   let auth;
 
   function updateProfile(user) {
-    document.getElementById('account-name').textContent = user ? (user.displayName || 'Google account') : 'Sam, 32';
     document.querySelectorAll('[data-google-avatar]').forEach(image => {
       const fallback = image.parentElement.querySelector('[data-avatar-fallback]');
       image.hidden = true;
