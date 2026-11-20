@@ -141,3 +141,16 @@ button:disabled { opacity: .48; cursor: default; }
 }
 .match-timing:not([hidden]) { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; color: var(--graphite); font-size: 13px; }
 #match-options[hidden] { display: none; }
+.photo-tap-hint {
+  position: absolute;
+  top: 14px;
+  left: 12px;
+  padding: 5px 8px;
+  border-radius: 7px;
+  background: #221a26dd;
+  color: white;
+  font-size: 11px;
+  pointer-events: none;
+}
+.swipe-feedback:not(:empty) + .photo-tap-hint { visibility: hidden; }
+.gallery-next { display: block; width: 100%; border-radius: 12px; }

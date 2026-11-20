@@ -216,7 +216,7 @@ button:focus-visible,label:focus-within,a:focus-visible{outline:1.5px solid var(
 .profile-photos{padding:12px 22px}.profile-photos img{width:72px;height:86px;object-fit:cover;border-radius:8px}
 #discover-status[hidden],#chat-form[hidden]{display:none}.composer input{min-width:0}.liked-profile{flex-wrap:wrap}.liked-profile .chip{margin-left:0}
 </style>
-<link rel="stylesheet" href="experience.css?v=11">
+<link rel="stylesheet" href="experience.css?v=12">
 </head>
 <body>
 <main class="wall">
@@ -386,7 +386,7 @@ button:focus-visible,label:focus-within,a:focus-visible{outline:1.5px solid var(
 
 <dialog class="photo-gallery" id="photo-gallery" aria-labelledby="gallery-title">
   <header><h2 id="gallery-title"></h2><form method="dialog"><button class="icon-btn" aria-label="Close photos">×</button></form></header>
-  <img id="gallery-image" alt="">
+  <button class="gallery-next" id="gallery-next" type="button" aria-label="Next gallery photo"><img id="gallery-image" alt=""></button>
   <div class="gallery-photos" id="gallery-photos"></div>
 </dialog>
 
@@ -457,7 +457,8 @@ function renderCard(){
         <button type="button" class="photo-tap" aria-label="Next profile photo"><img draggable="false" src="photos/${p.k}-${photo + 1}.jpg" alt="${p.name}, photo ${photo + 1} of 6"></button>
         <div class="meta"><h2>${p.name}, ${p.age}</h2><p>${p.job} · ${p.mi} miles away</p></div>
         <span class="swipe-feedback" aria-hidden="true"></span>
-        <button type="button" class="photo-count" data-gallery>View photos</button>
+        <span class="photo-tap-hint" aria-hidden="true">Tap for next photo</span>
+        <button type="button" class="photo-count" data-gallery aria-label="View all photos"><span data-photo-counter>${photo + 1} / 6</span></button>
         <button type="button" class="photo-arrow prev" data-photo-step="-1" aria-label="Previous photo">‹</button>
         <button type="button" class="photo-arrow next" data-photo-step="1" aria-label="Next photo">›</button>
       </div>
@@ -473,10 +474,11 @@ const cardWrap = document.getElementById("cardwrap");
 let pointerStart;
 let blockPhotoClick = false;
 cardWrap.addEventListener("pointerdown", event => {
-  if (!event.isPrimary || event.button !== 0 || !event.target.closest(".photo-tap")) return;
+  const photoButton = event.target.closest(".photo-tap");
+  if (!event.isPrimary || event.button !== 0 || !photoButton) return;
   blockPhotoClick = false;
   pointerStart = { id:event.pointerId, x:event.clientX, y:event.clientY };
-  event.target.setPointerCapture(event.pointerId);
+  photoButton.setPointerCapture(event.pointerId);
 });
 function clearDrag(){
   pointerStart = null;
@@ -526,6 +528,7 @@ function openGallery(index){
   setGalleryPhoto(index);
   gallery.showModal();
 }
+document.getElementById("gallery-next").addEventListener("click",() => setGalleryPhoto(galleryIndex + 1));
 galleryPhotos.addEventListener("click",event => {
   const button = event.target.closest("[data-gallery-index]");
   if (button) setGalleryPhoto(Number(button.dataset.galleryIndex));
@@ -550,6 +553,7 @@ cardWrap.addEventListener("click", event => {
   const image = cardWrap.querySelector(".portrait img");
   image.src = `photos/${person.k}-${photo + 1}.jpg`;
   image.alt = `${person.name}, photo ${photo + 1} of 6`;
+  cardWrap.querySelector("[data-photo-counter]").textContent = `${photo + 1} / 6`;
 });
 function swipe(liked){
   const c = document.getElementById("card");
