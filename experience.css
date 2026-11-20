@@ -36,9 +36,9 @@ button:disabled { opacity: .48; cursor: default; }
   --plum-light: #eee7ef;
   --gutter: clamp(16px, 3vw, 32px);
 }
-.wall { display: block; max-width: 1120px; padding: clamp(18px, 4vw, 48px) 24px; }
+.wall { display: grid; place-items: center; min-height: 100dvh; padding: 20px 12px; }
 .stage { position: static; display: block; }
-.phone { width: 100%; height: min(920px, calc(100dvh - clamp(36px, 8vw, 96px))); min-height: 590px; border: 1px solid #ded7dd; padding: 0; border-radius: 28px; box-shadow: 0 18px 65px #37273e12; }
+.phone { width: 390px; max-width: 100%; height: min(800px, calc(100dvh - 40px)); border: 1px solid #ded7dd; padding: 0; border-radius: 28px; box-shadow: 0 18px 65px #37273e12; }
 .screen { border-radius: inherit; display: grid; grid-template-columns: 172px minmax(0,1fr); grid-template-rows: minmax(0,1fr); }
 .without-nav .screen { grid-template-columns: minmax(0,1fr); }
 .view { grid-column: 2; grid-row: 1; min-width: 0; min-height: 0; overscroll-behavior: contain; }
@@ -111,31 +111,30 @@ button:disabled { opacity: .48; cursor: default; }
 .photo-gallery .icon-btn { font-size: 22px; }
 #gallery-image { display: block; width: 100%; height: min(57dvh,520px); object-fit: contain; background: var(--mist); border-radius: 12px; }
 .gallery-photos { grid-template-columns: repeat(6,minmax(0,1fr)); }
-@media (min-width: 900px) {
-  .spots { grid-template-columns: repeat(3,minmax(0,1fr)); }
-  .spot .bar i { max-width: 43%; }
-}
-@media (max-width: 730px) {
-  .wall { padding: 0; }
-  .phone { height: 100dvh; min-height: 0; border: 0; border-radius: 0; }
-  .screen, .without-nav .screen { grid-template-columns: minmax(0,1fr); grid-template-rows: minmax(0,1fr) auto; }
-  .view { grid-column: 1; }
-  .tabs { grid-column: 1; grid-row: 2; flex-direction: row; justify-content: space-around; gap: 2px; padding: 5px 5px max(6px,env(safe-area-inset-bottom)); border: 0; border-top: 1px solid var(--hair); }
-  .nav-brand { display: none; }
-  .tabs button { display: grid; flex: 1; padding: 6px 1px; gap: 3px; font-size: clamp(9px,2.6vw,12px); text-align: center; }
-  .view > .top { min-height: 61px; padding-block: 9px; margin-bottom: 10px; }
-  .welcome.on { grid-template-columns: 1fr; grid-template-rows: auto minmax(160px,1fr) auto; }
-  .welcome .hero { grid-row: 1; align-self: start; padding: 22px 22px 16px; }
-  .welcome .hero .brand-icon { width: 43px; height: 43px; border-radius: 11px; margin-bottom: 9px; }
-  .welcome .hero .wordmark { font-size: 57px; }
-  .welcome .hero p { margin-top: 6px; font-size: 22px; }
-  .welcome-photo { grid-area: 2 / 1; background-position: center 29%; margin: 0 18px; border-radius: 14px; }
-  .welcome .cta { grid-row: 3; padding: 14px 22px max(14px,env(safe-area-inset-bottom)); gap: 6px; }
-  .card { grid-template-columns: minmax(0,1fr); gap: 10px; }
-  .portrait { aspect-ratio: 1; max-height: 46dvh; }
-  .profile-facts { padding-bottom: 8px; }
-  .prompt { padding: 9px 0; }
-  .date-inputs { grid-template-columns: repeat(2,minmax(0,1fr)); }
+.screen, .without-nav .screen { grid-template-columns: minmax(0,1fr); grid-template-rows: minmax(0,1fr) auto; }
+.view { grid-column: 1; }
+.tabs { grid-column: 1; grid-row: 2; flex-direction: row; justify-content: space-around; gap: 2px; padding: 5px 5px max(6px,env(safe-area-inset-bottom)); border: 0; border-top: 1px solid var(--hair); }
+.nav-brand { display: none; }
+.tabs button { display: grid; flex: 1; padding: 6px 1px; gap: 3px; font-size: 10px; text-align: center; }
+.view > .top { min-height: 61px; padding-block: 9px; margin-bottom: 10px; }
+.welcome.on { grid-template-columns: 1fr; grid-template-rows: auto minmax(160px,1fr) auto; }
+.welcome .hero { grid-row: 1; align-self: start; padding: 22px 22px 16px; }
+.welcome .hero .brand-icon { width: 43px; height: 43px; border-radius: 11px; margin-bottom: 9px; }
+.welcome .hero .wordmark { font-size: 57px; }
+.welcome .hero p { margin-top: 6px; font-size: 22px; }
+.welcome-photo { grid-area: 2 / 1; background-position: center 29%; margin: 0 18px; border-radius: 14px; }
+.welcome .cta { grid-row: 3; padding: 14px 22px max(14px,env(safe-area-inset-bottom)); gap: 6px; }
+.card { grid-template-columns: minmax(0,1fr); gap: 10px; }
+.portrait { aspect-ratio: 1; max-height: 46dvh; }
+.profile-facts { padding-bottom: 8px; }
+.prompt { padding: 9px 0; }
+.date-inputs { grid-template-columns: repeat(2,minmax(0,1fr)); }
+.nav-brand { display: none; }
+.portrait { max-height: min(390px, 46dvh); }
+.photo-gallery { width: min(390px, calc(100% - 24px)); }
+@media (max-width: 430px) {
+  .wall { display: block; padding: 0; }
+  .phone { width: 100%; height: 100dvh; border: 0; border-radius: 0; }
 }
 @media (prefers-reduced-motion: reduce) {
   .photo-tap { transform: none; }
