@@ -64,6 +64,16 @@
       google.disabled = true;
       message.textContent = '';
       try {
+        const settingsResponse = await fetch(new URL('/auth/v1/settings', supabaseConfig.url), {
+          headers: {apikey: supabaseConfig.publishableKey},
+        });
+        if (!settingsResponse.ok) throw Error('Could not load Supabase authentication settings.');
+        const settings = await settingsResponse.json();
+        if (!settings.external?.google) {
+          message.textContent = 'Google sign-in is awaiting activation. Select Explore demo to try Eshveh.';
+          google.disabled = false;
+          return;
+        }
         const redirectTo = new URL('.', location.href).href;
         const {error} = await supabase.auth.signInWithOAuth({provider:'google',options:{redirectTo}});
         if (error) throw error;
