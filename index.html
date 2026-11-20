@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Eshveh App Preview</title>
+<link rel="icon" type="image/png" href="eshveh-logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Geist:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+/* Layout idea: a gallery wall. The phone sits left like an object on display; the launch plan reads as an exhibition label to its right. Single theme: ink on paper. */
+:root{
+  --paper:#f6f5f2;      /* page */
+  --ink:#0b0b0b;        /* text, primary buttons */
+  --graphite:#5e5e5b;   /* secondary text */
+  --hair:#d9d8d3;       /* rules, borders */
+  --mist:#ecebe7;       /* fills */
+  --white:#ffffff;
+  --display:"Cormorant Garamond", "Times New Roman", serif;
+  --body:"Geist", "Helvetica Neue", Arial, sans-serif;
+  color-scheme: light;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--paper);color:var(--ink);font-family:var(--body);font-weight:400;-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+button:focus-visible,label:focus-within,a:focus-visible{outline:1.5px solid var(--ink);outline-offset:3px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+.wall{max-width:1180px;margin:0 auto;padding:48px 24px 80px;display:grid;grid-template-columns:400px 1fr;gap:72px;align-items:start}
+@media (max-width:960px){.wall{grid-template-columns:1fr;gap:48px}.stage{justify-self:center}}
+
+/* ---------- header ---------- */
+.mast{grid-column:1/-1;display:flex;justify-content:space-between;align-items:baseline;border-bottom:1px solid var(--ink);padding-bottom:14px;gap:16px;flex-wrap:wrap}
+.mast h1{font-family:var(--display);font-weight:500;font-size:44px;letter-spacing:.01em;line-height:1}
+.mast h1 i{font-weight:400}
+.mast p{font-size:13px;color:var(--graphite);letter-spacing:.04em;text-transform:uppercase}
+
+/* ---------- phone ---------- */
+.stage{position:sticky;top:24px;display:grid;gap:18px}
+.phone{width:390px;max-width:100%;height:800px;background:var(--white);border:1px solid var(--ink);border-radius:52px;padding:12px;box-shadow:0 30px 60px -30px rgba(0,0,0,.35)}
+.screen{position:relative;height:100%;border-radius:40px;overflow:hidden;background:var(--white);display:flex;flex-direction:column}
+.status{height:44px;flex:none;display:flex;justify-content:space-between;align-items:center;padding:0 28px;font-size:13px;font-weight:500}
+.notch{width:110px;height:30px;background:var(--ink);border-radius:20px}
+.view{display:none;flex:1;flex-direction:column;overflow-y:auto;scrollbar-width:none}
+.view::-webkit-scrollbar{display:none}
+.view.on{display:flex;animation:fade .35s ease}
+.view>*{flex-shrink:0}
+@keyframes fade{from{opacity:.4;transform:translateY(6px)}to{opacity:1;transform:none}}
+.pad{padding:8px 22px 22px}
+.top{display:flex;justify-content:space-between;align-items:center;padding:6px 22px 14px}
+.wordmark{font-family:var(--display);font-size:28px;font-weight:500;letter-spacing:.02em}
+.icon-btn{width:38px;height:38px;border:1px solid var(--hair);border-radius:50%;display:grid;place-items:center}
+.eyebrow{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--graphite)}
+.h-display{font-family:var(--display);font-weight:500;font-size:34px;line-height:1.05;text-wrap:balance}
+.h-display i{font-weight:400}
+.muted{color:var(--graphite)}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;height:52px;border-radius:26px;font-size:15px;font-weight:500;width:100%;transition:transform .15s}
+.btn:active{transform:scale(.98)}
+.btn.solid{background:var(--ink);color:var(--white)}
+.btn.line{border:1px solid var(--ink)}
+.tabs{flex:none;display:flex;justify-content:space-around;border-top:1px solid var(--hair);padding:10px 8px 22px;background:var(--white)}
+.tabs button{display:grid;justify-items:center;gap:4px;font-size:10.5px;letter-spacing:.06em;color:var(--graphite);width:70px}
+.tabs button.on{color:var(--ink)}
+.tabs button.on svg{stroke-width:1.9}
+.tabs svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.4}
+.hidden{display:none!important}
+
+/* welcome */
+.welcome{justify-content:space-between;background:var(--ink);color:var(--white)}
+.welcome .hero{padding:60px 28px 0}
+.welcome .hero .wordmark{font-size:76px;line-height:.9}
+.welcome .hero p{font-family:var(--display);font-style:italic;font-size:26px;margin-top:14px;opacity:.85}
+.welcome ul{list-style:none;padding:0 28px;display:grid;gap:14px;font-size:14px;opacity:.8}
+.welcome ul li{display:flex;gap:12px;align-items:baseline}
+.welcome ul li span{font-family:var(--display);font-size:18px;width:20px}
+.welcome .cta{padding:24px 28px 34px;display:grid;gap:10px}
+.welcome .btn.solid{background:var(--white);color:var(--ink)}
+.welcome .btn.line{border-color:rgba(255,255,255,.5);color:var(--white)}
+.welcome small{text-align:center;font-size:11px;opacity:.5;margin-top:4px}
+
+/* discover card */
+.card{margin:0 16px;border-radius:28px;overflow:hidden;border:1px solid var(--hair);background:var(--white)}
+.portrait{height:430px;position:relative;background:var(--mist)}
+.portrait svg{width:100%;height:100%;display:block}
+.portrait .meta{position:absolute;left:0;right:0;bottom:0;padding:60px 20px 18px;color:var(--white);background:linear-gradient(transparent,rgba(0,0,0,.72))}
+.portrait .meta h3{font-family:var(--display);font-weight:500;font-size:36px;line-height:1}
+.portrait .meta p{font-size:13px;opacity:.85;margin-top:6px}
+.dots{position:absolute;top:12px;left:14px;right:14px;display:flex;gap:4px}
+.dots i{flex:1;height:2.5px;border-radius:2px;background:rgba(255,255,255,.45)}
+.dots i.on{background:var(--white)}
+.prompt{padding:18px 20px 20px;border-top:1px solid var(--hair)}
+.prompt .q{font-size:12px;color:var(--graphite)}
+.prompt .a{font-family:var(--display);font-size:22px;line-height:1.15;margin-top:6px}
+.actions{display:flex;justify-content:center;gap:22px;padding:18px 0 10px}
+.round{width:62px;height:62px;border-radius:50%;display:grid;place-items:center;border:1px solid var(--ink);transition:transform .15s}
+.round:active{transform:scale(.92)}
+.round.solid{background:var(--ink)}
+.round svg{width:24px;height:24px;fill:none;stroke-width:1.6}
+.round.solid svg{stroke:var(--white)}
+.round:not(.solid) svg{stroke:var(--ink)}
+.swipe-out{animation:out .35s ease forwards}
+@keyframes out{to{transform:translateX(var(--dx)) rotate(var(--rot));opacity:0}}
+
+/* match */
+.match{background:var(--ink);color:var(--white);justify-content:center;align-items:center;text-align:center;padding:30px}
+.pair{display:flex;margin:28px 0 26px}
+.pair .av{width:120px;height:150px;border-radius:70px;overflow:hidden;border:2px solid var(--white);background:#333}
+.pair .av+.av{margin-left:-22px}
+.match .h-display{font-size:46px}
+.match p{opacity:.7;font-size:14px;margin:10px 0 28px;max-width:260px;line-height:1.5}
+.match .btn.solid{background:var(--white);color:var(--ink)}
+.match .btn.line{border-color:rgba(255,255,255,.4);color:var(--white);margin-top:10px}
+
+/* chat list + chat */
+.row{display:flex;gap:14px;align-items:center;padding:14px 22px;border-bottom:1px solid var(--mist);text-align:left;width:100%}
+.av-s{width:52px;height:52px;border-radius:50%;overflow:hidden;flex:none;background:var(--mist)}
+.row b{font-weight:500;font-size:15px}
+.row p{font-size:13px;color:var(--graphite);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:230px}
+.new-dot{width:8px;height:8px;border-radius:50%;background:var(--ink);margin-left:auto;flex:none}
+.bubbles{display:flex;flex-direction:column;gap:8px;padding:10px 18px 14px;flex:1}
+.b{max-width:78%;padding:10px 14px;border-radius:20px;font-size:14px;line-height:1.4}
+.b.them{background:var(--mist);align-self:flex-start;border-bottom-left-radius:6px}
+.b.me{background:var(--ink);color:var(--white);align-self:flex-end;border-bottom-right-radius:6px}
+.stamp{align-self:center;font-size:11px;color:var(--graphite);margin:6px 0}
+.plan-card{align-self:flex-end;width:78%;border:1px solid var(--ink);border-radius:20px;overflow:hidden;background:var(--white)}
+.plan-card .ph{height:84px;background:var(--ink);color:var(--white);display:flex;align-items:flex-end;padding:12px 14px;font-family:var(--display);font-size:22px}
+.plan-card .bd{padding:10px 14px 12px;font-size:12.5px;color:var(--graphite);display:grid;gap:3px}
+.plan-card .bd b{color:var(--ink);font-weight:500}
+.composer{flex:none;display:flex;gap:8px;padding:10px 14px 24px;border-top:1px solid var(--hair);align-items:center}
+.composer .chip{flex:none}
+.composer input{flex:1;height:40px;border:1px solid var(--hair);border-radius:20px;padding:0 14px;font:inherit;font-size:14px;background:var(--white)}
+.chip{height:34px;padding:0 14px;border:1px solid var(--ink);border-radius:17px;font-size:12.5px;font-weight:500;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.chip.solid{background:var(--ink);color:var(--white)}
+
+/* date plan */
+.when{display:flex;gap:8px;overflow-x:auto;padding:4px 22px 16px;scrollbar-width:none}
+.when::-webkit-scrollbar{display:none}
+.mapbox{margin:0 22px;border:1px solid var(--hair);border-radius:22px;overflow:hidden;background:var(--white)}
+.mapbox svg{display:block;width:100%;height:auto}
+.legend{display:flex;justify-content:space-between;padding:10px 14px;font-size:11.5px;color:var(--graphite);border-top:1px solid var(--hair)}
+.spots{display:grid;gap:10px;padding:16px 22px 8px}
+.spot{display:grid;grid-template-columns:28px 1fr;gap:12px;text-align:left;border:1px solid var(--hair);border-radius:20px;padding:14px;transition:border-color .2s, background .2s}
+.spot.on{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
+.spot .n{font-family:var(--display);font-size:26px;line-height:1}
+.spot h4{font-family:var(--display);font-weight:500;font-size:22px;line-height:1.1}
+.spot .sub{font-size:12px;color:var(--graphite);margin-top:2px}
+.spot .facts{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:10px;font-size:12px;font-variant-numeric:tabular-nums}
+.spot .facts span{display:inline-flex;align-items:center;gap:5px}
+.bar{display:flex;gap:3px;margin-top:10px;align-items:center;font-size:11px;color:var(--graphite)}
+.bar i{display:block;height:3px;background:var(--ink);border-radius:2px}
+.bar i.them{background:var(--hair)}
+.sticky-cta{position:sticky;bottom:0;padding:12px 22px 18px;background:linear-gradient(transparent,var(--white) 30%)}
+
+/* closet */
+.seg{display:flex;gap:6px;overflow-x:auto;padding:0 22px 14px;scrollbar-width:none}
+.seg::-webkit-scrollbar{display:none}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:0 22px 22px}
+.tile{aspect-ratio:3/4;border-radius:16px;background:var(--mist);display:grid;place-items:center;position:relative;overflow:hidden}
+.tile svg{width:62%;height:62%;stroke:var(--ink);fill:none;stroke-width:1.2}
+.tile img{width:100%;height:100%;object-fit:cover;filter:grayscale(1) contrast(1.05)}
+.tile .tag{position:absolute;left:6px;bottom:6px;right:6px;font-size:9.5px;letter-spacing:.04em;background:rgba(255,255,255,.9);border-radius:8px;padding:3px 6px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tile.add{background:var(--white);border:1px dashed var(--graphite);cursor:pointer;align-content:center;gap:6px;font-size:11.5px;color:var(--graphite);text-align:center}
+.tile.add svg{width:26px;height:26px;margin:0 auto}
+.tile.add input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.scanning::after{content:"";position:absolute;left:0;right:0;height:30%;background:linear-gradient(transparent,rgba(255,255,255,.7),transparent);animation:scan 1.1s linear infinite}
+@keyframes scan{from{top:-30%}to{top:100%}}
+
+/* looks */
+.wx{margin:0 22px;border:1px solid var(--ink);border-radius:20px;padding:14px 16px;display:grid;grid-template-columns:auto 1fr;gap:4px 14px;align-items:center}
+.wx .t{font-family:var(--display);font-size:44px;line-height:1;grid-row:span 2;font-variant-numeric:tabular-nums}
+.wx b{font-weight:500;font-size:14px}
+.wx p{font-size:12px;color:var(--graphite)}
+.look-tabs{display:flex;gap:6px;padding:16px 22px 12px}
+.look{margin:0 22px;border-radius:24px;background:var(--mist);padding:16px}
+.look .pieces{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.look .pc{background:var(--white);border-radius:14px;aspect-ratio:1;display:grid;place-items:center;position:relative}
+.look .pc svg{width:58%;height:58%;stroke:var(--ink);fill:none;stroke-width:1.2}
+.look .pc span{position:absolute;bottom:7px;left:8px;right:8px;font-size:10px;text-align:center;color:var(--graphite)}
+.look h4{font-family:var(--display);font-weight:500;font-size:28px;margin:14px 2px 4px}
+.look p{font-size:13px;line-height:1.5;color:var(--graphite);margin:0 2px}
+
+/* profile */
+.prof-head{display:flex;gap:16px;align-items:center;padding:6px 22px 18px}
+.prof-head .av-s{width:76px;height:76px;object-fit:cover;border-radius:50%}
+.list{border-top:1px solid var(--hair);margin:0 22px}
+.list div{display:flex;justify-content:space-between;padding:15px 0;border-bottom:1px solid var(--hair);font-size:14px}
+.list div span:last-child{color:var(--graphite)}
+
+/* screen picker under phone */
+.picker{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;max-width:390px}
+.picker button{font-size:12px;padding:6px 12px;border:1px solid var(--hair);border-radius:14px;color:var(--graphite)}
+.picker button.on{border-color:var(--ink);color:var(--ink)}
+
+/* ---------- right column ---------- */
+.notes{display:grid;gap:56px;padding-top:8px}
+.notes h2{font-family:var(--display);font-weight:500;font-size:40px;line-height:1.05;text-wrap:balance}
+.notes h2 i{font-weight:400}
+.lede{font-size:16px;line-height:1.6;color:var(--graphite);max-width:62ch;margin-top:14px}
+.features{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--hair);border:1px solid var(--hair);margin-top:28px}
+@media (max-width:640px){.features{grid-template-columns:1fr}}
+.feature{background:var(--paper);padding:22px}
+.feature .k{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--graphite)}
+.feature h3{font-family:var(--display);font-weight:500;font-size:24px;margin:8px 0 8px}
+.feature ol{padding-left:18px;font-size:14px;line-height:1.6;color:var(--graphite);display:grid;gap:4px}
+.feature ol b{color:var(--ink);font-weight:500}
+
+.roadmap{margin-top:30px;border-top:1px solid var(--ink)}
+.step{display:grid;grid-template-columns:64px 1fr auto;gap:20px;padding:22px 0;border-bottom:1px solid var(--hair);align-items:start}
+@media (max-width:640px){.step{grid-template-columns:44px 1fr}.step .state{grid-column:2}}
+.step .num{font-family:var(--display);font-size:40px;line-height:.9;font-variant-numeric:tabular-nums}
+.step h3{font-size:16px;font-weight:500}
+.step p{font-size:14px;line-height:1.55;color:var(--graphite);margin-top:6px;max-width:60ch}
+.step ul{list-style:none;margin-top:10px;display:grid;gap:6px;font-size:13.5px;line-height:1.45}
+.step li{display:grid;grid-template-columns:16px 1fr;gap:8px}
+.step li::before{content:"";width:9px;height:9px;border:1px solid var(--ink);border-radius:2px;margin-top:4px}
+.step li.done::before{background:var(--ink)}
+.state{font-size:11px;letter-spacing:.1em;text-transform:uppercase;padding:5px 10px;border-radius:12px;border:1px solid var(--hair);white-space:nowrap;color:var(--graphite)}
+.state.done{background:var(--ink);color:var(--white);border-color:var(--ink)}
+.state.next{border-color:var(--ink);color:var(--ink)}
+.step.is-done .num{color:var(--graphite)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;background:var(--mist);padding:1px 6px;border-radius:5px;color:var(--ink)}
+.foot{font-size:12px;color:var(--graphite);border-top:1px solid var(--hair);padding-top:16px;line-height:1.6}
+.account-panel{display:grid;gap:14px}
+.account-panel h2{font-family:var(--display);font-size:34px}
+.account-panel p{font-size:14px}
+.profile-facts{display:flex;flex-wrap:wrap;gap:8px;padding:15px 18px}
+.profile-facts span{background:#f1f0ec;padding:6px 9px;border-radius:5px;font-size:12px}
+.av img,.av-s img{width:100%;height:100%;object-fit:cover;display:block}
+.portrait img{display:block;width:100%;height:100%;object-fit:cover}
+.photo-count{position:absolute;top:12px;right:12px;pointer-events:none;background:#161616;color:#fff;border-radius:12px;padding:4px 10px;font-size:12px}
+.brand-icon{display:block;width:76px;height:76px;border-radius:22px;margin-bottom:14px}
+.photo-tap{display:block;width:100%;height:100%;padding:0;touch-action:pan-y;cursor:pointer}
+.photo-tap img{user-select:none}
+.portrait .meta{pointer-events:none}
+.discover-logo{width:32px;height:32px;border-radius:9px}
+.tabs button{width:auto;flex:1;min-width:0;letter-spacing:0}
+.tabs img,.tabs .account-avatar{width:22px;height:22px;border-radius:50%;object-fit:cover}
+.tabs [hidden],.prof-head [hidden]{display:none}
+.swipe-hint{padding:8px 16px;font-size:13px;text-align:center;color:var(--graphite)}
+.liked-profile{display:flex;align-items:center;gap:14px;text-align:left;width:100%;padding:12px 0;border-bottom:1px solid var(--hair)}
+.liked-profile img{width:56px;height:64px;object-fit:cover;border-radius:8px}
+</style>
+</head>
+<body>
+<div class="wall">
+  <header class="mast">
+    <h1>Eshveh <i>— app preview</i></h1>
+    <p>v0.1 · Updated Nov 20, 2026 · Sample data</p>
+  </header>
+
+  <!-- ================= PHONE ================= -->
+  <section class="stage" aria-label="Clickable app preview">
+    <div class="phone">
+      <div class="screen">
+        <div class="status" id="statusbar"><span>7:30</span><span class="notch"></span><span>5G ▮▮▮</span></div>
+
+        <!-- 1 Welcome -->
+        <div class="view welcome on" data-view="welcome">
+          <div class="hero">
+            <img class="brand-icon" src="eshveh-logo.png" alt="">
+            <div class="wordmark">Eshveh</div>
+            <p>Fewer swipes. Better first dates.</p>
+          </div>
+          <ul>
+            <li><span>i</span>Match with people who fit what you want.</li>
+            <li><span>ii</span>Get three 4★+ spots halfway between you.</li>
+            <li><span>iii</span>Get three looks from your own closet for the weather.</li>
+          </ul>
+          <div class="cta">
+            <button class="btn solid" data-account="new">Sign up</button>
+            <button class="btn line" data-account="returning">Sign in</button>
+            <small>18+ only. By continuing you agree to our Terms and Privacy Policy.</small>
+          </div>
+        </div>
+
+        <div class="view" data-view="account">
+          <div class="pad account-panel">
+            <button class="btn line" type="button" data-go="welcome">Back</button>
+            <h2>Create your account</h2>
+            <p>Use your Google account to continue.</p>
+            <button class="btn solid" type="button" data-google>Continue with Google</button>
+            <p role="status" aria-live="polite"></p>
+            <button class="btn line" type="button" data-go="discover">Explore demo</button>
+          </div>
+        </div>
+
+        <!-- 2 Discover -->
+        <div class="view" data-view="discover">
+          <div class="top"><span class="wordmark"><img class="discover-logo" src="eshveh-logo.png" alt="Eshveh"></span>
+            <button class="icon-btn" aria-label="Filters"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg></button>
+          </div>
+          <p class="swipe-hint">Tap for the next photo. Swipe right to like or left to pass.</p>
+          <div id="cardwrap"></div>
+          <div class="actions">
+            <button class="round" id="pass" aria-label="Pass"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+            <button class="round solid" id="like" aria-label="Like"><svg viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg></button>
+          </div>
+        </div>
+
+        <!-- 3 Match -->
+        <div class="view match" data-view="match">
+          <span class="eyebrow" style="color:rgba(255,255,255,.6)">You both said yes</span>
+          <div class="pair"><div class="av" id="av-me"></div><div class="av" id="av-them"></div></div>
+          <div class="h-display">It's a <i>match.</i></div>
+          <p>We already found three great spots halfway between you and Ava.</p>
+          <button class="btn solid" data-go="plan">See your date spots</button>
+          <button class="btn line" data-go="chat">Say hi first</button>
+        </div>
+
+        <!-- 4 Matches list -->
+        <div class="view" data-view="matches">
+          <div class="top"><span class="wordmark">Matches</span></div>
+          <div class="pad" style="padding-top:0"><span class="eyebrow">New</span></div>
+          <div style="display:flex;gap:12px;padding:0 22px 18px">
+            <button data-go="chat" style="display:grid;gap:6px;justify-items:center;font-size:12px"><span class="av-s" style="width:64px;height:64px" data-portrait="ava"></span>Ava</button>
+            <button style="display:grid;gap:6px;justify-items:center;font-size:12px"><span class="av-s" style="width:64px;height:64px" data-portrait="mia"></span>Mia</button>
+          </div>
+          <div class="pad" style="padding-bottom:4px"><span class="eyebrow">Messages</span></div>
+          <button class="row" data-go="chat"><span class="av-s" data-portrait="ava"></span><span><b>Ava</b><p>Friday works. Is Maison Lune okay?</p></span><span class="new-dot"></span></button>
+          <button class="row"><span class="av-s" data-portrait="nora"></span><span><b>Nora</b><p>Ha, that's exactly my Sunday too</p></span></button>
+          <button class="row"><span class="av-s" data-portrait="lena"></span><span><b>Lena</b><p>You: Have you tried the café on Damen?</p></span></button>
+        </div>
+
+        <!-- 5 Chat -->
+        <div class="view" data-view="chat">
+          <div class="top" style="justify-content:flex-start;gap:12px">
+            <button class="icon-btn" data-go="matches" aria-label="Back"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M15 5l-7 7 7 7"/></svg></button>
+            <span class="av-s" style="width:38px;height:38px" data-portrait="ava"></span>
+            <span><b style="font-weight:500">Ava</b><br><span class="muted" style="font-size:12px">29 · 4 mi away</span></span>
+          </div>
+          <div class="bubbles" id="bubbles">
+            <span class="stamp">Today 6:12 PM</span>
+            <div class="b me">Your farmers market answer won me over.</div>
+            <div class="b them">Ha. Saturday mornings are sacred. Want to get dinner this week?</div>
+            <div class="b me">Yes. Eshveh picked three places halfway between us.</div>
+          </div>
+          <div class="composer">
+            <button class="chip solid" data-go="plan">Plan a date</button>
+            <input id="msg" placeholder="Message Ava" aria-label="Message">
+          </div>
+        </div>
+
+        <!-- 6 Date plan -->
+        <div class="view" data-view="plan">
+          <div class="top" style="justify-content:flex-start;gap:12px">
+            <button class="icon-btn" data-go="chat" aria-label="Back"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M15 5l-7 7 7 7"/></svg></button>
+            <span><span class="eyebrow">Date with Ava</span><br><span class="h-display" style="font-size:26px">Three spots, <i>halfway.</i></span></span>
+          </div>
+          <div class="when" id="when"></div>
+          <div class="mapbox">
+            <svg viewBox="0 0 340 190" aria-label="Map showing you, Ava, the midpoint and three spots">
+              <defs><pattern id="g" width="20" height="20" patternUnits="userSpaceOnUse"><path d="M20 0H0V20" fill="none" stroke="#ecebe7" stroke-width="1"/></pattern></defs>
+              <rect width="340" height="190" fill="url(#g)"/>
+              <path d="M0 140 C80 120 120 160 200 130 S300 90 340 100" stroke="#d9d8d3" stroke-width="10" fill="none"/>
+              <path d="M110 0 L130 190 M250 0 L235 190" stroke="#e4e3df" stroke-width="5"/>
+              <circle cx="182" cy="96" r="44" fill="none" stroke="#0b0b0b" stroke-dasharray="3 4" stroke-width="1"/>
+              <path d="M48 40 L182 96 L310 160" stroke="#0b0b0b" stroke-width="1" fill="none" stroke-dasharray="1 4" stroke-linecap="round"/>
+              <g font-family="Geist, sans-serif" font-size="10" fill="#0b0b0b">
+                <circle cx="48" cy="40" r="6" fill="#0b0b0b"/><text x="58" y="36">You</text>
+                <circle cx="310" cy="160" r="6" fill="#fff" stroke="#0b0b0b" stroke-width="1.5"/><text x="276" y="178">Ava</text>
+                <path d="M178 96h8M182 92v8" stroke="#0b0b0b"/><text x="190" y="112" fill="#5e5e5b">midpoint</text>
+              </g>
+              <g id="pins" font-family="Cormorant Garamond, serif" font-size="13" font-weight="600" text-anchor="middle"></g>
+            </svg>
+            <div class="legend"><span>● You  ○ Ava</span><span>Only places rated 4.0★ and up</span></div>
+          </div>
+          <div class="spots" id="spots"></div>
+          <div class="sticky-cta">
+            <button class="btn solid" id="send-plan">Send to Ava</button>
+          </div>
+        </div>
+
+        <!-- 7 Closet -->
+        <div class="view" data-view="closet">
+          <div class="top"><span class="wordmark">Closet</span><span class="muted" style="font-size:12px" id="count">10 pieces</span></div>
+          <div class="seg"><span class="chip solid">All</span><span class="chip">Tops</span><span class="chip">Bottoms</span><span class="chip">Outerwear</span><span class="chip">Shoes</span><span class="chip">Extras</span></div>
+          <div class="grid" id="grid">
+            <label class="tile add" for="upload"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Add a piece<input type="file" id="upload" accept="image/*"></label>
+          </div>
+          <div class="sticky-cta">
+            <button class="btn solid" data-go="looks">Style me for Friday</button>
+          </div>
+        </div>
+
+        <!-- 8 Looks -->
+        <div class="view" data-view="looks">
+          <div class="top" style="justify-content:flex-start;gap:12px">
+            <button class="icon-btn" data-go="closet" aria-label="Back"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M15 5l-7 7 7 7"/></svg></button>
+            <span><span class="eyebrow">Friday · Maison Lune</span><br><span class="h-display" style="font-size:26px">Three looks, <i>yours.</i></span></span>
+          </div>
+          <div class="wx">
+            <span class="t">48°</span>
+            <b>Light rain, feels like 44°F at 7:30 PM</b>
+            <p>Upscale French bistro · bring a coat</p>
+          </div>
+          <div class="look-tabs" id="look-tabs"></div>
+          <div class="look" id="look"></div>
+          <div class="pad" style="padding-top:16px"><button class="btn line" data-go="plan">Back to date plan</button></div>
+        </div>
+
+        <!-- 9 Profile -->
+        <div class="view" data-view="likes">
+          <div class="top"><span class="wordmark">Likes You</span></div>
+          <div class="pad"><p class="muted">Sample likes</p><div id="received-likes"></div></div>
+        </div>
+
+        <div class="view" data-view="profile">
+          <div class="top"><span class="wordmark">Profile</span><button class="chip">Edit</button></div>
+          <div class="prof-head"><span class="av-s" data-portrait="sam" data-avatar-fallback></span><img class="av-s account-avatar" data-google-avatar hidden alt=""><span><span class="h-display" id="account-name" style="font-size:30px">Sam, 32</span><br><span class="muted" style="font-size:13px">Architect · Chicago</span></span></div>
+          <div class="list">
+            <div><span>Looking for</span><span>Women, 25–35</span></div>
+            <div><span>Distance</span><span>Up to 15 mi</span></div>
+            <div><span>Getting to dates</span><span>Drive</span></div>
+            <div><span>Location</span><span>On, never shown to others</span></div>
+            <div><span>Verified</span><span>Selfie check</span></div>
+            <div><span>Safety</span><span>Block & report</span></div>
+          </div>
+        </div>
+
+        <nav class="tabs" id="tabs">
+          <button data-go="discover" data-tab="discover"><img src="eshveh-logo.png" alt="">Discover</button>
+          <button data-go="likes" data-tab="likes" aria-label="Likes You"><svg viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg>Likes You</button>
+          <button data-go="matches" data-tab="matches"><svg viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"/></svg>Matches</button>
+          <button data-go="closet" data-tab="closet"><svg viewBox="0 0 24 24"><path d="M12 4a2 2 0 0 0-2 2c0 1.2 2 1.8 2 3L3 15.5c-.8.6-.4 1.5.5 1.5h17c.9 0 1.3-.9.5-1.5L12 9"/></svg>Closet</button>
+          <button data-go="plan" data-tab="plan"><svg viewBox="0 0 24 24"><path d="M19 10c0 5-7 11-7 11S5 15 5 10a7 7 0 1 1 14 0z"/><circle cx="12" cy="10" r="2.5"/></svg>Places</button>
+          <button data-go="profile" data-tab="profile"><img class="account-avatar" data-google-avatar hidden alt=""><svg data-avatar-fallback viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>Profile</button>
+        </nav>
+      </div>
+    </div>
+    <div class="picker" id="picker"></div>
+  </section>
+
+  <!-- ================= NOTES ================= -->
+  <main class="notes">
+    <section>
+      <span class="eyebrow">What Eshveh does</span>
+      <h2>A dating app that plans <i>the first date</i> for you.</h2>
+      <p class="lede">Tap through the phone on the left. Everything is black and white, every screen has one clear action, and the two features that set Eshveh apart show up right after a match.</p>
+      <div class="features">
+        <div class="feature">
+          <span class="k">Feature 01</span>
+          <h3>Three spots, halfway</h3>
+          <ol>
+            <li>Finds the <b>midpoint</b> between both of you.</li>
+            <li>Searches <b>Google Places</b> for restaurants and cafés around it.</li>
+            <li>Keeps only places rated <b>4.0★ or higher</b> with 50+ reviews, open at your date time.</li>
+            <li>Asks <b>Google Routes</b> for real travel time from each of you.</li>
+            <li>Ranks by rating and fairness, then picks <b>3 different kinds</b> of places.</li>
+          </ol>
+        </div>
+        <div class="feature">
+          <span class="k">Feature 02</span>
+          <h3>Three looks, your closet</h3>
+          <ol>
+            <li>You photograph each piece once.</li>
+            <li><b>Claude</b> tags it: type, color, how dressy, how warm.</li>
+            <li>Eshveh checks the <b>forecast</b> at the restaurant for the date's hour.</li>
+            <li>Matches dressiness to the spot: café = casual, bistro = smart, fine dining = upscale.</li>
+            <li>Builds <b>3 distinct, complete outfits</b>, adding a coat when it's cold or rainy.</li>
+          </ol>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <span class="eyebrow">Your launch plan</span>
+      <h2>Eight steps from <i>here</i> to the App Store.</h2>
+      <p class="lede">Step 1 is done. The backend and the app code are written and tested. The next steps are mostly accounts and paperwork that need you personally.</p>
+      <div class="roadmap">
+        <div class="step is-done"><span class="num">01</span><div><h3>Build the first version</h3>
+          <p>Backend (Python + FastAPI) and the iPhone/Android app (React Native + Expo).</p>
+          <ul><li class="done">Sign up, profiles, photos, location kept private</li><li class="done">Discover, likes, matches, chat, block & report</li><li class="done">Date spots: midpoint + Google Places + Google Routes, 4★+</li><li class="done">Closet upload + Claude tagging + 3 weather-aware looks</li><li class="done">App screens: welcome, sign up, 4-step onboarding, swipe deck, match, chat, date spots, closet, looks, profile</li><li class="done">15 backend tests passing; app type-checks and builds for iPhone</li></ul></div><span class="state done">Done</span></div>
+
+        <div class="step"><span class="num">02</span><div><h3>Create your API keys</h3>
+          <p>These let the backend talk to Google and Claude. Each takes about 10 minutes.</p>
+          <ul><li class="done">Google Cloud terms accepted and project "Noir Dating App" created</li><li><b style="font-weight:500">You:</b> click Verify Account in Google Cloud and add your phone number and card (Google requires this; free-trial credit applies)</li><li>Then Claude enables <code>Places API (New)</code> and <code>Routes API</code> and creates a key restricted to those two</li><li>Anthropic Console: create an API key for clothing tagging and styling</li><li>Paste both into the backend's <code>.env</code> file</li></ul></div><span class="state next">Needs you</span></div>
+
+        <div class="step"><span class="num">03</span><div><h3>Run it on your computer and phone</h3>
+          <p>See the real app working with real places before spending anything on hosting.</p>
+          <ul><li>Install Docker Desktop and Node.js</li><li>Backend: <code>docker compose up</code>, then open <code>localhost:8000/docs</code></li><li>App: <code>npm install</code> then <code>npx expo start</code>, scan the QR code with your phone</li></ul></div><span class="state">To do</span></div>
+
+        <div class="step"><span class="num">04</span><div><h3>Developer accounts</h3>
+          <p>Needed to put the app on phones outside your own.</p>
+          <ul><li>Apple Developer Program (yearly fee) for iPhone</li><li>Google Play Console (one-time fee) for Android</li><li>Expo account for cloud builds with EAS</li><li>Form an LLC first if you want the store listing under a company name</li></ul></div><span class="state">To do</span></div>
+
+        <div class="step"><span class="num">05</span><div><h3>Put the backend online</h3>
+          <p>One server, one database, one place for photos.</p>
+          <ul><li>Host the API on Render, Railway or Fly.io</li><li>Managed PostgreSQL from the same host</li><li>Photos in Amazon S3 or Cloudflare R2</li><li>A domain like <code>api.yourdomain.com</code> with HTTPS</li></ul></div><span class="state">To do</span></div>
+
+        <div class="step"><span class="num">06</span><div><h3>Safety, privacy and legal</h3>
+          <p>App stores reject dating apps without these, and US rules apply to location and photos.</p>
+          <ul><li>Privacy Policy and Terms of Service (have a lawyer review)</li><li>Photo moderation and selfie verification</li><li>Clear 18+ age gate (already in the backend)</li><li>Check state privacy laws such as California's CCPA and, if you add face checks, Illinois' BIPA</li></ul></div><span class="state">To do</span></div>
+
+        <div class="step"><span class="num">07</span><div><h3>Private beta in one city</h3>
+          <p>Dating apps need density. Launch where 200–500 people can join in the same few weeks.</p>
+          <ul><li>TestFlight (iPhone) and Play internal testing (Android)</li><li>Invite friends and friends of friends, balanced men and women</li><li>Watch: matches per user, plans sent, dates that happen</li></ul></div><span class="state">To do</span></div>
+
+        <div class="step"><span class="num">08</span><div><h3>Public launch</h3>
+          <p>Submit to both stores, then grow city by city.</p>
+          <ul><li>Store listing: screenshots from this preview, description, support email</li><li>Optional subscription later, such as unlimited likes or priority date spots</li><li>Add more cities when the first one has steady daily matches</li></ul></div><span class="state">To do</span></div>
+      </div>
+    </section>
+
+    <p class="foot">People, places and clothes on this page are sample data for the preview. In the real app, places come live from Google Maps and outfits come from your own uploaded photos. This page will be updated as the app changes.</p>
+  </main>
+</div>
+
+<script>
+// ---------- portraits: abstract monochrome silhouettes (no real photos) ----------
+const TONES = {ava:["#2b2b2b","#8a8a86"],mia:["#3c3c3a","#b9b8b3"],nora:["#1c1c1c","#6f6f6c"],lena:["#4a4a47","#cfcec9"],sam:["#151515","#9d9c97"],june:["#333","#aaa9a4"],ivy:["#222","#c4c3be"]};
+function portrait(key, hair){
+  const [d,l] = TONES[key] || TONES.ava;
+  const id = key + Math.random().toString(36).slice(2,7);
+  return `<svg viewBox="0 0 300 400" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+    <defs><linearGradient id="bg${id}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${l}"/><stop offset="1" stop-color="#f1f0ec"/></linearGradient>
+    <filter id="n${id}"><feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="2" stitchTiles="stitch"/><feColorMatrix values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 .12 0"/></filter></defs>
+    <rect width="300" height="400" fill="url(#bg${id})"/>
+    <path d="M30 400 C40 300 95 270 150 270 C205 270 260 300 270 400Z" fill="${d}"/>
+    <rect x="132" y="215" width="36" height="60" rx="14" fill="${d}" opacity=".92"/>
+    ${hair==="long"?`<path d="M88 170 C80 90 120 70 150 70 C185 70 222 95 212 170 L222 280 C200 290 180 260 178 240 L122 240 C120 260 100 290 78 280Z" fill="${d}" opacity=".95"/>`:""}
+    <ellipse cx="150" cy="160" rx="52" ry="64" fill="${d}"/>
+    ${hair==="short"?`<path d="M96 150 C96 95 130 86 150 86 C178 86 206 98 204 148 C190 120 120 118 96 150Z" fill="#000" opacity=".35"/>`:""}
+    <rect width="300" height="400" filter="url(#n${id})"/>
+  </svg>`;
+}
+document.querySelectorAll("[data-portrait]").forEach(el=>{const k=el.dataset.portrait; el.innerHTML = portrait(k, k==="sam"?"short":"long");});
+document.getElementById("av-me").innerHTML = portrait("sam","short");
+document.getElementById("av-them").innerHTML = '<img src="photos/ava-1.jpg" alt="Ava">';
+document.querySelectorAll('[data-portrait="ava"]').forEach(element => {
+  element.innerHTML = '<img src="photos/ava-1.jpg" alt="Ava">';
+});
+
+// ---------- navigation ----------
+const LABELS = {welcome:"Welcome",discover:"Discover",likes:"Likes You",match:"Match",matches:"Matches",chat:"Chat",plan:"Places",closet:"Closet",looks:"Looks",profile:"Profile"};
+const NO_TABS = ["welcome","account","match","chat","looks"];
+const TAB_OF = {discover:"discover",matches:"matches",chat:"matches",closet:"closet",looks:"closet",profile:"profile",plan:"plan",likes:"likes"};
+const picker = document.getElementById("picker");
+Object.entries(LABELS).forEach(([k,v])=>{const b=document.createElement("button");b.textContent=v;b.dataset.go=k;picker.appendChild(b);});
+function go(name){
+  document.querySelectorAll(".view").forEach(v=>v.classList.toggle("on", v.dataset.view===name));
+  document.getElementById("tabs").classList.toggle("hidden", NO_TABS.includes(name));
+  document.querySelectorAll("#tabs button").forEach(b=>b.classList.toggle("on", b.dataset.tab===TAB_OF[name]));
+  picker.querySelectorAll("button").forEach(b=>b.classList.toggle("on", b.dataset.go===name));
+  const sb = document.getElementById("statusbar");
+  const dark = name==="welcome"||name==="match";
+  sb.style.background = dark ? "#0b0b0b" : "#fff"; sb.style.color = dark ? "#fff" : "#0b0b0b";
+  if (location.hash !== "#"+name) history.replaceState(null,"","#"+name);
+}
+document.addEventListener("click", e=>{const t=e.target.closest("[data-go]"); if(t){e.preventDefault(); go(t.dataset.go);}});
+
+// ---------- discover ----------
+const PEOPLE = [
+  { k:"june", name:"June", age:27, job:"Pastry chef", city:"Fort Worth", mi:3, height:"5′4″", education:"Culinary school", intent:"Long-term relationship", interests:"Baking · cycling · museums", prompts:[["A skill I’m proud of","Making croissants in a tiny apartment kitchen."],["Let’s do this together","Pick pastries for each other at a bakery."],["An ideal Sunday","A bike ride before the city wakes up."]] },
+  { k:"ivy", name:"Ivy", age:31, job:"Product designer", city:"Dallas", mi:6, height:"5′8″", education:"BFA", intent:"Long-term relationship", interests:"Illustration · jazz · coffee", prompts:[["A perfect first date","Coffee that turns into dinner."],["My latest rabbit hole","Hand-lettered signs at old diners."],["Something I’ll always make time for","Live jazz with friends."]] },
+  { k:"ava", name:"Ava", age:29, job:"Pediatric nurse", city:"Arlington", mi:4, height:"5′6″", education:"BSN", intent:"Long-term relationship", interests:"Gardening · hiking · cooking", prompts:[["Ideal Sunday","Farmers market early, a long walk, and a nap."],["My favorite small ritual","Planting something new every spring."],["Let’s do this together","Try a salsa recipe and take it to a picnic."]] },
+  { k:"maya", name:"Maya", age:30, job:"Civil engineer", city:"Irving", mi:8, height:"5′5″", education:"MS in civil engineering", intent:"Long-term relationship", interests:"Climbing · pottery · road trips", prompts:[["A first date I’d say yes to","Pottery and tacos, in that order."],["A project I’m proud of","My first mug can actually hold water."],["I’d love to know","What’s your favorite road-trip stop?"]] },
+  { k:"claire", name:"Claire", age:28, job:"Wildlife educator", city:"Grapevine", mi:11, height:"5′7″", education:"BS in ecology", intent:"Open to a relationship", interests:"Birding · bookstores · swimming", prompts:[["The best part of my week","An early walk with my binoculars."],["Ask me about","The owl that taught me patience."],["My ideal date","A used bookstore and waffles afterwards."]] },
+];
+let idx = 0;
+let photo = 0;
+function renderCard(){
+  const p = PEOPLE[idx % PEOPLE.length];
+  document.getElementById("cardwrap").innerHTML = `<article class="card" id="card">
+    <div class="portrait">
+      <button type="button" class="photo-tap" aria-label="Next photo"><img draggable="false" src="photos/${p.k}-${photo + 1}.jpg" alt="${p.name}, photo ${photo + 1} of 6"></button>
+      <div class="meta"><h3>${p.name}, ${p.age}</h3><p>${p.job} · ${p.mi} miles away</p></div>
+      <span class="photo-count" aria-live="polite">${photo + 1} / 6</span>
+    </div>
+    <div class="profile-facts">${[p.city,p.height,p.education,p.intent,p.interests].map(value => `<span>${value}</span>`).join("")}</div>
+    ${p.prompts.map(([q,a]) => `<div class="prompt"><div class="q">${q}</div><div class="a">${a}</div></div>`).join("")}
+    </article>`;
+}
+const cardWrap = document.getElementById("cardwrap");
+let pointerStart;
+let blockPhotoClick = false;
+cardWrap.addEventListener("pointerdown", event => {
+  if (!event.isPrimary || event.button !== 0 || !event.target.closest(".photo-tap")) return;
+  blockPhotoClick = false;
+  pointerStart = { id:event.pointerId, x:event.clientX, y:event.clientY };
+  event.target.setPointerCapture(event.pointerId);
+});
+cardWrap.addEventListener("pointercancel", () => { pointerStart = null; });
+cardWrap.addEventListener("pointerup", event => {
+  if (pointerStart?.id !== event.pointerId) return;
+  const dx = event.clientX - pointerStart.x;
+  const dy = event.clientY - pointerStart.y;
+  pointerStart = null;
+  blockPhotoClick = Math.hypot(dx, dy) > 12;
+  if (Math.abs(dx) >= 55 && Math.abs(dx) > 1.35 * Math.abs(dy)) swipe(dx > 0);
+});
+cardWrap.addEventListener("click", event => {
+  if (!event.target.closest(".photo-tap") || (event.detail && blockPhotoClick) || document.querySelector(".swipe-out")) return;
+  photo = (photo + 1) % 6;
+  const person = PEOPLE[idx % PEOPLE.length];
+  const image = document.querySelector("#card .portrait img");
+  image.src = `photos/${person.k}-${photo + 1}.jpg`;
+  image.alt = `${person.name}, photo ${photo + 1} of 6`;
+  document.querySelector("#card .photo-count").textContent = `${photo + 1} / 6`;
+});
+function swipe(liked){
+  const c = document.getElementById("card");
+  if (c.classList.contains("swipe-out")) return;
+  const p = PEOPLE[idx % PEOPLE.length];
+  c.style.setProperty("--dx", liked? "420px":"-420px"); c.style.setProperty("--rot", liked? "12deg":"-12deg");
+  c.classList.add("swipe-out");
+  setTimeout(()=>{ idx++; photo = 0; renderCard(); if(liked && p.k==="ava") go("match"); }, 320);
+}
+document.getElementById("like").onclick = ()=>swipe(true);
+document.getElementById("pass").onclick = ()=>swipe(false);
+renderCard();
+
+const receivedLikes = document.getElementById("received-likes");
+PEOPLE.filter(p => ["ava", "maya"].includes(p.k)).forEach(p => {
+  const button = document.createElement("button");
+  button.className = "liked-profile";
+  button.type = "button";
+  button.innerHTML = `<img src="photos/${p.k}-1.jpg" alt=""><span><strong>${p.name}, ${p.age}</strong><br>${p.city}</span>`;
+  button.onclick = () => {
+    if (document.querySelector(".swipe-out")) return;
+    idx = PEOPLE.indexOf(p);
+    photo = 0;
+    renderCard();
+    go("discover");
+  };
+  receivedLikes.appendChild(button);
+});
+
+// ---------- date plan ----------
+const DAYS = ["Fri, Nov 27 · 7:30 PM","Sat, Nov 28 · 8:00 PM","Sun, Nov 29 · 11:00 AM"];
+const when = document.getElementById("when");
+DAYS.forEach((d,i)=>{const b=document.createElement("button");b.className="chip"+(i===0?" solid":"");b.textContent=d;b.onclick=()=>{when.querySelectorAll(".chip").forEach(x=>x.classList.remove("solid"));b.classList.add("solid");};when.appendChild(b);});
+const SPOTS = [
+  {name:"Maison Lune",kind:"French bistro",vibe:"Upscale",price:"$$$",rating:4.7,reviews:1284,you:14,them:12,x:168,y:78},
+  {name:"Hollow Coffee & Wine",kind:"Café · wine bar",vibe:"Casual",price:"$",rating:4.6,reviews:812,you:11,them:15,x:205,y:110},
+  {name:"Osteria Verde",kind:"Italian",vibe:"Smart casual",price:"$$",rating:4.5,reviews:2051,you:16,them:13,x:160,y:120},
+];
+let chosen = 0;
+function renderSpots(){
+  document.getElementById("spots").innerHTML = SPOTS.map((s,i)=>{
+    const max = Math.max(...SPOTS.flatMap(x=>[x.you,x.them]));
+    return `<button class="spot${i===chosen?" on":""}" data-i="${i}" aria-pressed="${i===chosen}">
+      <span class="n">${i+1}</span>
+      <span><h4>${s.name}</h4><div class="sub">${s.kind} · ${s.price} · ${s.vibe}</div>
+      <div class="facts"><span>★ ${s.rating.toFixed(1)} <span class="muted">(${s.reviews.toLocaleString()})</span></span><span>Open at 7:30 PM</span></div>
+      <div class="bar"><span style="width:34px">You</span><i style="width:${s.you/max*120}px"></i><span>${s.you} min</span></div>
+      <div class="bar"><span style="width:34px">Ava</span><i class="them" style="width:${s.them/max*120}px;background:#9d9c97"></i><span>${s.them} min</span></div></span></button>`;
+  }).join("");
+  document.getElementById("pins").innerHTML = SPOTS.map((s,i)=>`<g><circle cx="${s.x}" cy="${s.y}" r="11" fill="${i===chosen?"#0b0b0b":"#fff"}" stroke="#0b0b0b"/><text x="${s.x}" y="${s.y+4.5}" fill="${i===chosen?"#fff":"#0b0b0b"}">${i+1}</text></g>`).join("");
+  document.querySelectorAll(".spot").forEach(b=>b.onclick=()=>{chosen=+b.dataset.i;renderSpots();});
+  document.getElementById("send-plan").textContent = `Send ${SPOTS[chosen].name} to Ava`;
+}
+renderSpots();
+document.getElementById("send-plan").onclick = ()=>{
+  const s = SPOTS[chosen]; const day = when.querySelector(".solid").textContent;
+  const bub = document.getElementById("bubbles");
+  bub.insertAdjacentHTML("beforeend", `<div class="plan-card"><div class="ph">${s.name}</div><div class="bd"><b>${day}</b><span>${s.kind} · ★ ${s.rating} · ${s.you} min for you, ${s.them} for Ava</span></div></div>
+    <div class="b them">Ooh, I've wanted to try ${s.name.split(" ")[0]}. Yes!</div>
+    <div class="b me">Perfect. Picking my outfit now.</div>`);
+  go("chat"); setTimeout(()=>bub.parentElement.scrollTop = 99999, 50);
+};
+document.getElementById("msg").addEventListener("keydown", e=>{
+  if(e.key==="Enter" && e.target.value.trim()){
+    const d=document.createElement("div"); d.className="b me"; d.textContent=e.target.value.trim();
+    document.getElementById("bubbles").appendChild(d); e.target.value="";
+    d.scrollIntoView({block:"end"});
+  }
+});
+
+// ---------- closet ----------
+const ICON = {
+  shirt:'<path d="M8 4l-5 3 2 5 3-1v10h8V11l3 1 2-5-5-3c-.5 1.5-2 2.5-4 2.5S8.5 5.5 8 4z"/><path d="M12 6.5V21"/>',
+  sweater:'<path d="M8 4l-5 4 2 6 3-1v8h8v-8l3 1 2-6-5-4"/><path d="M8 4c1 2 2.5 2.5 4 2.5S15 6 16 4"/><path d="M8 18h8"/>',
+  tee:'<path d="M8 4L3 7l2 4 3-1v11h8V10l3 1 2-4-5-3c-.5 1.2-2 2-4 2S8.5 5.2 8 4z"/>',
+  trousers:'<path d="M7 3h10l1 18h-4l-2-12-2 12H6z"/><path d="M7 6h10"/>',
+  jeans:'<path d="M7 3h10l1 18h-4l-2-12-2 12H6z"/><path d="M7 6h10M9 6v2M15 6v2"/>',
+  loafers:'<path d="M3 15c0-2 1-3 3-3h4c2 0 3 1 5 2l4 1c1.5.4 2 1 2 2v1H3z"/><path d="M8 12v3h6"/>',
+  sneakers:'<path d="M3 16v-4l4-1 3 2c2 1 5 1 7 1.5 2 .5 4 1.5 4 2.5v1H3z"/><path d="M3 18h18M9 13l1-2M12 14l1-2"/>',
+  coat:'<path d="M8 3l-4 3v15h5V10l3 4 3-4v11h5V6l-4-3-4 5z"/><circle cx="10.5" cy="16" r=".6"/><circle cx="10.5" cy="19" r=".6"/>',
+  watch:'<circle cx="12" cy="12" r="5"/><path d="M10 4h4l.5 3M10 20h4l.5-3M9.5 7L10 4M9.5 17l.5 3M12 10v2l1.5 1"/>',
+  blazer:'<path d="M8 3l-4 3v15h16V6l-4-3"/><path d="M8 3l4 8 4-8M12 11v10M6 14h3"/>',
+};
+const CLOSET = [
+  {i:"coat",t:"Camel overcoat"},{i:"blazer",t:"Navy blazer"},{i:"shirt",t:"White oxford"},
+  {i:"sweater",t:"Black merino"},{i:"tee",t:"Grey tee"},{i:"trousers",t:"Charcoal trousers"},
+  {i:"jeans",t:"Dark jeans"},{i:"loafers",t:"Brown loafers"},{i:"sneakers",t:"White sneakers"},{i:"watch",t:"Silver watch"},
+];
+const grid = document.getElementById("grid");
+CLOSET.forEach(c=>grid.insertAdjacentHTML("beforeend", `<div class="tile"><svg viewBox="0 0 24 24">${ICON[c.i]}</svg><span class="tag">${c.t}</span></div>`));
+document.getElementById("upload").addEventListener("change", e=>{
+  const f = e.target.files[0]; if(!f) return;
+  const r = new FileReader();
+  r.onload = ()=>{
+    const t = document.createElement("div"); t.className="tile scanning";
+    t.innerHTML = `<img alt="Your uploaded piece" src="${r.result}"><span class="tag">Claude is tagging…</span>`;
+    grid.children[0].after(t);
+    setTimeout(()=>{t.classList.remove("scanning"); t.querySelector(".tag").textContent="Tagged · smart casual";
+      document.getElementById("count").textContent = (grid.children.length-1)+" pieces";},1600);
+  };
+  r.readAsDataURL(f); e.target.value="";
+});
+
+// ---------- looks ----------
+const LOOKS = [
+  {name:"The Classic",items:[["coat","Camel overcoat"],["shirt","White oxford"],["trousers","Charcoal trousers"],["loafers","Brown loafers"]],
+   why:"Tailored and warm for a rainy 44°F evening. The camel coat lifts the charcoal and white, and loafers match a bistro with tablecloths."},
+  {name:"Soft Tailoring",items:[["blazer","Navy blazer"],["sweater","Black merino"],["trousers","Charcoal trousers"],["watch","Silver watch"]],
+   why:"Merino under a blazer reads dressed-up without a tie and keeps you warm walking in from the car. Silver watch as the one detail."},
+  {name:"Dark & Easy",items:[["coat","Camel overcoat"],["sweater","Black merino"],["jeans","Dark jeans"],["loafers","Brown loafers"]],
+   why:"The relaxed option: dark denim stays upscale with a black knit and a good coat. Comfortable if dinner turns into a walk."},
+];
+let lk = 0;
+function renderLook(){
+  document.getElementById("look-tabs").innerHTML = LOOKS.map((l,i)=>`<button class="chip${i===lk?" solid":""}" data-l="${i}">Look ${i+1}</button>`).join("");
+  const l = LOOKS[lk];
+  document.getElementById("look").innerHTML = `<div class="pieces">${l.items.map(([ic,t])=>`<div class="pc"><svg viewBox="0 0 24 24">${ICON[ic]}</svg><span>${t}</span></div>`).join("")}</div><h4>${l.name}</h4><p>${l.why}</p>`;
+  document.querySelectorAll("[data-l]").forEach(b=>b.onclick=()=>{lk=+b.dataset.l;renderLook();});
+}
+renderLook();
+
+// ---------- start ----------
+go("welcome");
+window.addEventListener("hashchange", ()=>{const h=location.hash.slice(1); if(LABELS[h]) go(h);});
+</script>
+<script defer src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script defer src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script defer src="firebase-config.js"></script>
+<script defer src="account.js"></script>
+</body>
+</html>
